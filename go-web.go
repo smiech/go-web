@@ -8,8 +8,11 @@ import (
 	"regexp"
 )
 
-var templates = template.Must(template.ParseFiles("edit.html", "view.html"))
+var templates = template.Must(template.ParseGlob(templatePath + "*"))
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
+
+const templatePath string = "templates/"
+const dataPath string = "data/"
 
 type page struct {
 	Title string
@@ -27,12 +30,12 @@ func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
 
 func (p *page) save() error {
 	filename := p.Title + ".html"
-	return ioutil.WriteFile(filename, p.Body, 0600)
+	return ioutil.WriteFile(dataPath+filename, p.Body, 0600)
 }
 
 func loadPage(title string) (*page, error) {
 	filename := title + ".html"
-	body, err := ioutil.ReadFile(filename)
+	body, err := ioutil.ReadFile(dataPath + filename)
 	if err != nil {
 		return nil, err
 	}
