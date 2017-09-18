@@ -11,8 +11,9 @@ import (
 var templates = template.Must(template.ParseGlob(templatePath + "*"))
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
 
-const templatePath string = "templates/"
-const dataPath string = "data/"
+const rootRedirectURL = "/view/newFrontPage"
+const templatePath = "templates/"
+const dataPath = "data/"
 
 type page struct {
 	Title string
@@ -78,7 +79,7 @@ func editHandler(w http.ResponseWriter, r *http.Request, title string) {
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, "/view/newFrontPage", http.StatusFound)
+	http.Redirect(w, r, rootRedirectURL, http.StatusFound)
 }
 
 func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
