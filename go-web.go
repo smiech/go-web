@@ -100,7 +100,18 @@ func index(w http.ResponseWriter, r *http.Request) {
 	renderTemplate(w, "index.tmpl", nil)
 }
 
-func aboutMe(w http.ResponseWriter, r *http.Request) {
+func login(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case "GET":
+		renderTemplate(w, "login.tmpl", nil)
+	case "POST":
+		r.ParseForm()
+		log.Println(r.Form)
+		http.Redirect(w, r, "/signup", http.StatusFound)
+	}
+}
+
+func signup(w http.ResponseWriter, r *http.Request) {
 	userData := &UserData{Name: "Asit Dhal", City: "Bhubaneswar", Nationality: "Indian"}
 	renderTemplate(w, "aboutme.tmpl", userData)
 }
@@ -119,8 +130,11 @@ func main() {
 		Addr: "127.0.0.1:8080",
 	}
 
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", index)
-	http.HandleFunc("/aboutme", aboutMe)
+	http.HandleFunc("/signup", signup)
 	http.HandleFunc("/skillset", skillSet)
+	http.HandleFunc("/login", login)
 	server.ListenAndServe()
 }
