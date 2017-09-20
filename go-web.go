@@ -5,23 +5,22 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"os"
 	"path/filepath"
+	"time"
 
+	"github.com/gorilla/context"
+	"github.com/gorilla/sessions"
 	"github.com/oxtoacart/bpool"
 )
 
 var templates map[string]*template.Template
 var bufpool *bpool.BufferPool
 
-type UserData struct {
-	Name        string
-	City        string
-	Nationality string
-}
-
-type SkillSet struct {
-	Language string
-	Level    string
+type WizardStep struct {
+	StepTitle  string
+	StepNumber string
+	Content    string
 }
 
 type TemplateConfig struct {
@@ -29,7 +28,7 @@ type TemplateConfig struct {
 	TemplateIncludePath string
 }
 
-type SkillSets []*SkillSet
+var store = sessions.NewCookieStore([]byte("something-very-secret"))
 
 var mainTmpl = `{{define "main" }} {{ template "base" . }} {{ end }}`
 
@@ -107,34 +106,62 @@ func login(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		r.ParseForm()
 		log.Println(r.Form)
-		http.Redirect(w, r, "/signup", http.StatusFound)
+		session, _ := store.Get(r, "session-name")
+		usrName := r.Form["user"][0]
+		currentTime := time.Now().String()
+		session.Values[usrName] = currentTime
+		session.Values["user"] = usrName
+		session.Save(r, w)
+		http.Redirect(w, r, "/step", http.StatusFound)
 	}
 }
 
-func signup(w http.ResponseWriter, r *http.Request) {
-	userData := &UserData{Name: "Asit Dhal", City: "Bhubaneswar", Nationality: "Indian"}
-	renderTemplate(w, "aboutme.tmpl", userData)
+func step(w http.ResponseWriter, r *http.Request) {
+	session, _ := store.Get(r, "session-name")
+	// Set some session values.
+	log.Println(session.Values["user"])
+	log.Println(r.Form["user"])
+	wizardStep := &WizardStep{StepTitle: "Signup", StepNumber: "1", Content: "Indian"}
+	renderTemplate(w, "wizardstep.tmpl", wizardStep)
 }
 
-func skillSet(w http.ResponseWriter, r *http.Request) {
-	skillSets := SkillSets{&SkillSet{Language: "Golang", Level: "Beginner"},
-		&SkillSet{Language: "C++", Level: "Advanced"},
-		&SkillSet{Language: "Python", Level: "Advanced"}}
-	renderTemplate(w, "skillset.tmpl", skillSets)
+func configureLogger() {
+	f, err := os.OpenFile("log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Printf("error opening file: %v", err)
+	}
+
+	defer f.Close()
+	log.SetOutput(f)
+	log.Println("hello")
+}
+
+func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		session, err := store.Get(r, "session-name")
+		if err != nil {
+			http.Error(w, fmt.Sprintf("The session expired \n"), http.StatusInternalServerError)
+			return
+		}
+		log.Println(session.Values["user"])
+		log.Println(r.Form["user"])
+		fn(w, r)
+	}
 }
 
 func main() {
+	//configureLogger()
 	loadConfiguration()
 	loadTemplates()
-	server := http.Server{
-		Addr: "127.0.0.1:8080",
-	}
+	/*server := http.Server{
+		Addr:    "127.0.0.1:" + "8080",
+		Handler: context.ClearHandler(http.DefaultServeMux),
+	}*/
 
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/", index)
-	http.HandleFunc("/signup", signup)
-	http.HandleFunc("/skillset", skillSet)
-	http.HandleFunc("/login", login)
-	server.ListenAndServe()
+	http.HandleFunc("/", login)
+	http.HandleFunc("/step", step)
+	http.HandleFunc("/login", sessionCheckingHandler(login))
+	http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux))
 }
