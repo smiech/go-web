@@ -1,102 +1,126 @@
 package main
 
 import (
-	"errors"
+	"fmt"
 	"html/template"
-	"io/ioutil"
+	"log"
 	"net/http"
-	"regexp"
+	"path/filepath"
+
+	"github.com/oxtoacart/bpool"
 )
 
-var templates = template.Must(template.ParseGlob(templatePath + "*"))
-var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
+var templates map[string]*template.Template
+var bufpool *bpool.BufferPool
 
-const rootRedirectURL = "/view/newFrontPage"
-const templatePath = "templates/"
-const dataPath = "data/"
-
-type page struct {
-	Title string
-	Body  []byte
+type UserData struct {
+	Name        string
+	City        string
+	Nationality string
 }
 
-func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
-	m := validPath.FindStringSubmatch(r.URL.Path)
-	if m == nil {
-		http.NotFound(w, r)
-		return "", errors.New("Invalid Page Title")
+type SkillSet struct {
+	Language string
+	Level    string
+}
+
+type TemplateConfig struct {
+	TemplateLayoutPath  string
+	TemplateIncludePath string
+}
+
+type SkillSets []*SkillSet
+
+var mainTmpl = `{{define "main" }} {{ template "base" . }} {{ end }}`
+
+var templateConfig TemplateConfig
+
+func loadConfiguration() {
+	templateConfig.TemplateLayoutPath = "templates/layouts/"
+	templateConfig.TemplateIncludePath = "templates/"
+}
+
+func loadTemplates() {
+	if templates == nil {
+		templates = make(map[string]*template.Template)
 	}
-	return m[2], nil // The title is the second subexpression.
-}
 
-func (p *page) save() error {
-	filename := p.Title + ".html"
-	return ioutil.WriteFile(dataPath+filename, p.Body, 0600)
-}
-
-func loadPage(title string) (*page, error) {
-	filename := title + ".html"
-	body, err := ioutil.ReadFile(dataPath + filename)
+	layoutFiles, err := filepath.Glob(templateConfig.TemplateLayoutPath + "*.tmpl")
 	if err != nil {
-		return nil, err
+		log.Fatal(err)
 	}
-	return &page{Title: title, Body: body}, nil
-}
 
-func renderTemplate(w http.ResponseWriter, tmpl string, p *page) {
-	err := templates.ExecuteTemplate(w, tmpl+".html", p)
+	includeFiles, err := filepath.Glob(templateConfig.TemplateIncludePath + "*.tmpl")
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		log.Fatal(err)
 	}
-}
 
-func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		m := validPath.FindStringSubmatch(r.URL.Path)
-		if m == nil {
-			http.NotFound(w, r)
-			return
+	mainTemplate := template.New("main")
+
+	mainTemplate, err = mainTemplate.Parse(mainTmpl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, file := range includeFiles {
+		fileName := filepath.Base(file)
+		files := append(layoutFiles, file)
+		templates[fileName], err = mainTemplate.Clone()
+		if err != nil {
+			log.Fatal(err)
 		}
-		fn(w, r, m[2])
+		templates[fileName] = template.Must(templates[fileName].ParseFiles(files...))
 	}
+
+	log.Println("templates loading successful")
+
+	bufpool = bpool.NewBufferPool(64)
+	log.Println("buffer allocation successful")
 }
 
-func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
-	p, err := loadPage(title)
-	if err != nil {
-		http.Redirect(w, r, "/edit/"+title, http.StatusFound)
-		return
+func renderTemplate(w http.ResponseWriter, name string, data interface{}) {
+	tmpl, ok := templates[name]
+	if !ok {
+		http.Error(w, fmt.Sprintf("The template %s does not exist.", name),
+			http.StatusInternalServerError)
 	}
-	renderTemplate(w, "view", p)
-}
 
-func editHandler(w http.ResponseWriter, r *http.Request, title string) {
-	p, err := loadPage(title)
-	if err != nil {
-		p = &page{Title: title}
-	}
-	renderTemplate(w, "edit", p)
-}
+	buf := bufpool.Get()
+	defer bufpool.Put(buf)
 
-func rootHandler(w http.ResponseWriter, r *http.Request) {
-	http.Redirect(w, r, rootRedirectURL, http.StatusFound)
-}
-
-func saveHandler(w http.ResponseWriter, r *http.Request, title string) {
-	body := r.FormValue("body")
-	p := &page{Title: title, Body: []byte(body)}
-	err := p.save()
+	err := tmpl.Execute(buf, data)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
 	}
-	http.Redirect(w, r, "/view/"+title, http.StatusFound)
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	buf.WriteTo(w)
+}
+
+func index(w http.ResponseWriter, r *http.Request) {
+	renderTemplate(w, "index.tmpl", nil)
+}
+
+func aboutMe(w http.ResponseWriter, r *http.Request) {
+	userData := &UserData{Name: "Asit Dhal", City: "Bhubaneswar", Nationality: "Indian"}
+	renderTemplate(w, "aboutme.tmpl", userData)
+}
+
+func skillSet(w http.ResponseWriter, r *http.Request) {
+	skillSets := SkillSets{&SkillSet{Language: "Golang", Level: "Beginner"},
+		&SkillSet{Language: "C++", Level: "Advanced"},
+		&SkillSet{Language: "Python", Level: "Advanced"}}
+	renderTemplate(w, "skillset.tmpl", skillSets)
 }
 
 func main() {
-	http.HandleFunc("/", rootHandler)
-	http.HandleFunc("/view/", makeHandler(viewHandler))
-	http.HandleFunc("/edit/", makeHandler(editHandler))
-	http.HandleFunc("/save/", makeHandler(saveHandler))
-	http.ListenAndServe(":8080", nil)
+	loadConfiguration()
+	loadTemplates()
+	server := http.Server{
+		Addr: "127.0.0.1:8080",
+	}
+
+	http.HandleFunc("/", index)
+	http.HandleFunc("/aboutme", aboutMe)
+	http.HandleFunc("/skillset", skillSet)
+	server.ListenAndServe()
 }
