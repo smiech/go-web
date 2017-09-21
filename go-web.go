@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -26,6 +28,29 @@ type WizardStep struct {
 type TemplateConfig struct {
 	TemplateLayoutPath  string
 	TemplateIncludePath string
+}
+
+type Device struct {
+	Id   string
+	Name string
+}
+
+func (p *Device) save() error {
+	res1B, _ := json.Marshal(p)
+	fmt.Println(string(res1B))
+	filename := "devices.json"
+	return ioutil.WriteFile(filename, res1B, 0600)
+}
+
+func load(title string) (*Device, error) {
+	filename := "devices.json"
+	device := Device{}
+	body, err := ioutil.ReadFile(filename)
+	json.Unmarshal(body, &device)
+	if err != nil {
+		return nil, err
+	}
+	return &Device{Id: device.Id, Name: device.Name}, nil
 }
 
 var store = sessions.NewCookieStore([]byte("something-very-secret"))
@@ -104,9 +129,8 @@ func login(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		renderTemplate(w, "login.tmpl", nil)
 	case "POST":
-		r.ParseForm()
-		log.Println(r.Form)
 		session, _ := store.Get(r, "session-name")
+		r.ParseForm()
 		usrName := r.Form["user"][0]
 		currentTime := time.Now().String()
 		session.Values[usrName] = currentTime
@@ -117,11 +141,17 @@ func login(w http.ResponseWriter, r *http.Request) {
 }
 
 func step(w http.ResponseWriter, r *http.Request) {
-	session, _ := store.Get(r, "session-name")
-	// Set some session values.
-	log.Println(session.Values["user"])
-	log.Println(r.Form["user"])
-	wizardStep := &WizardStep{StepTitle: "Signup", StepNumber: "1", Content: "Indian"}
+	wizardStep := &WizardStep{StepTitle: "Signup", StepNumber: "2", Content: "Register user"}
+	renderTemplate(w, "wizardstep.tmpl", wizardStep)
+}
+
+func step2(w http.ResponseWriter, r *http.Request) {
+	wizardStep := &WizardStep{StepTitle: "Setup", StepNumber: "3", Content: "Add devices"}
+	renderTemplate(w, "setup.tmpl", wizardStep)
+}
+
+func step3(w http.ResponseWriter, r *http.Request) {
+	wizardStep := &WizardStep{StepTitle: "Test", StepNumber: "4", Content: "Add devices"}
 	renderTemplate(w, "wizardstep.tmpl", wizardStep)
 }
 
@@ -143,8 +173,13 @@ func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.Ha
 			http.Error(w, fmt.Sprintf("The session expired \n"), http.StatusInternalServerError)
 			return
 		}
-		log.Println(session.Values["user"])
-		log.Println(r.Form["user"])
+		userName := session.Values["user"]
+		log.Printf("%v", userName)
+		if userName != "adam" {
+			http.Error(w, fmt.Sprintf("Invalid login \n"), http.StatusInternalServerError)
+			return
+		}
+
 		fn(w, r)
 	}
 }
@@ -153,15 +188,14 @@ func main() {
 	//configureLogger()
 	loadConfiguration()
 	loadTemplates()
-	/*server := http.Server{
-		Addr:    "127.0.0.1:" + "8080",
-		Handler: context.ClearHandler(http.DefaultServeMux),
-	}*/
-
+	de := Device{Id: "aa", Name: "bb"}
+	de.save()
 	fs := http.FileServer(http.Dir("static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
-	http.HandleFunc("/", login)
-	http.HandleFunc("/step", step)
-	http.HandleFunc("/login", sessionCheckingHandler(login))
+	http.Handle("/", http.FileServer(http.Dir("./client/dist")))
+	http.HandleFunc("/api/step", sessionCheckingHandler(step))
+	http.HandleFunc("/api/step2", sessionCheckingHandler(step2))
+	http.HandleFunc("/api/step3", sessionCheckingHandler(step3))
+	http.HandleFunc("/api/login", login)
 	http.ListenAndServe(":8080", context.ClearHandler(http.DefaultServeMux))
 }

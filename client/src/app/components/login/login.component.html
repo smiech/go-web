@@ -1,0 +1,41 @@
+﻿<div class="pm-container">
+        <section id="pm-flashes" class="pm-grid" >
+            <div class="pm-grid-cell" >
+                <div class="pm-flash-error" *ngIf="showLoginError">
+                    <span>Invalid username or password!</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="pm-grid pm-signin">
+            <form>
+                <div class="pm-grid-cell--8 pm-grid-shift--2 pm-signin__form">
+                    <div class="pm-section__header">
+                        <h2>Login</h2>
+                    </div>
+
+                    <div class="pm-field">
+                        <label for="pm-signin-user-email">Email</label>
+                        <div class="pm-input-group">
+                            <span class="pm-input-group-label" aria-hidden="true"><i class="fa fa-envelope fa-fw"></i></span>
+                            <input id="pm-signin-user-email" autofocus type="email" name="pm-signin-user-email" class="pm-input-group-field" #loginInput [(ngModel)]="userName">
+                        </div>
+                    </div>
+
+                    <div class="pm-field pm-field--password">
+                        <label for="pm-signin-user-password">password</label>
+                        <div class="pm-input-group">
+                            <span class="pm-input-group-label" aria-hidden="true"><i class="fa fa-lock fa-fw"></i></span>
+                            <input id="pm-signin-user-password" [attr.type]="showPassword ? 'text' : 'password' " name="pm-signin-user-password"
+                                   class="pm-input-group-field jsPasswordField" [(ngModel)]="password">
+                        
+                        </div>
+                    </div>
+
+                    <div class="pm-field--actions">
+                        <button class="pm-button pm-button--primary pm-large-button" (click)="login()">Log in</button>
+                    </div>
+                </div>
+            </form>
+        </section>    
+</div>

@@ -4,6 +4,8 @@
     <p>Step {{.StepNumber}}</p>
     <p>{{.Content}}</p>
 </div>
-<input type="button" value="Next" />
+<form action="/step{{ printf "%v" .StepNumber}}" method="GET">
+    <input type="submit" value="Next" />
+</form>
 
 {{ end }}
