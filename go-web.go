@@ -184,6 +184,68 @@ func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.Ha
 	}
 }
 
+type User struct {
+	Guid           string
+	Name           string
+	Email          string
+	ServiceCookies map[string]string
+}
+
+type AuthenticateResponse struct {
+	IsSuccessful bool
+	User         User
+}
+
+func Auth((w http.ResponseWriter, r *http.Request){
+	authenticateResponse := AuthenticateResponse{}
+}
+
+func Authenticate(username string, password string) AuthenticateResponse {
+
+	authenticateResponse := AuthenticateResponse{}
+}
+
+/*public AuthenticateResponse Authenticate(string username, string password)
+  {
+      AuthenticateResponse authenticateResponse = new AuthenticateResponse();
+
+      var client = new RestClient(_settings.ServiceUrl);
+      var request = new RestRequest("Account/AppLogin", Method.POST);
+      request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
+      request.AddParameter("email", username);
+      request.AddParameter("password", password);
+      request.AddHeader("X-Requested-With", "XMLHttpRequest");
+      request.AddHeader("nl.72media.riskmanager.appversion", "");
+
+      RestResponse response = null;
+      _log.LogInformation("Service starting task");
+      Task.Run(async () =>
+      {
+          response = await RestClientHelper.GetResponseContentAsync(client, request) as RestResponse;
+          var result = JsonConvert.DeserializeObject<AppLoginResponse>(response.Content);
+          authenticateResponse.IsSuccessful = result.Success;
+
+          if (result.Success)
+          {
+              authenticateResponse.User = new User
+              {
+                  ID = result?.UserId ?? Guid.Empty,
+                  Email = result?.User?.Email ?? string.Empty,
+                  ServiceCookies = new Dictionary<string, string>(),
+                  Name = result?.User?.Name ?? string.Empty
+              };
+
+              response.Cookies.ToList().ForEach(x =>
+              {
+                  authenticateResponse.User.ServiceCookies.Add(x.Name, x.Value);
+              });
+          }
+
+      }).Wait();
+
+      return authenticateResponse;
+  }*/
+
 func main() {
 	//configureLogger()
 	loadConfiguration()
