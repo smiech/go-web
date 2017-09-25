@@ -12,13 +12,18 @@
         <div class='navbar-collapse collapse'>
             <ul class='nav navbar-nav'>
                 <li [routerLinkActive]="['link-active']" [routerLinkActiveOptions]="{ exact: true }">
-                    <a [routerLink]="['/']">
+                    <a [routerLink]="['/home']">
                         <span class='glyphicon glyphicon-home'></span> Home
                     </a>
                 </li>
                 <li [routerLinkActive]="['link-active']">
                     <a [routerLink]="['/login']">
                         <span class='glyphicon glyphicon-education'></span> Login
+                    </a>
+                </li>
+                <li *ngFor="let item of extraMenuItems" [routerLinkActive]="['link-active']" >
+                    <a [routerLink]="item.link">
+                        <span class='glyphicon glyphicon-education'></span>   {{item.name}}
                     </a>
                 </li>
             </ul>

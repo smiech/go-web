@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/auth0/go-jwt-middleware"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -39,7 +38,7 @@ func load(title string) (*Device, error) {
 	return &Device{Id: device.Id, Name: device.Name}, nil
 }
 
-var store = sessions.NewCookieStore([]byte("something-very-secret"))
+var store = sessions.NewCookieStore([]byte("dwadziescia-muharadzinow-bije-trzech-rabinow"))
 
 func configureLogger() {
 	f, err := os.OpenFile("log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -94,40 +93,77 @@ func main() {
 	de.save()
 
 	r.Handle("/get-token", GetTokenHandler).Methods("GET")
-	r.Handle("/status", jwtMiddleware.Handler(ProductsHandler)).Methods("GET")
-	r.PathPrefix("/").Handler(jwtMiddleware.Handler(http.FileServer(http.Dir("./client/dist/"))))
+	r.Handle("/status", authMiddleware(ProductsHandler)).Methods("GET")
+	r.PathPrefix("/").Handler(authMiddleware(http.FileServer(http.Dir("./client/dist/"))))
 	http.ListenAndServe(":8080", handlers.LoggingHandler(os.Stdout, r))
 }
 
 /* Set up a global string for our secret */
 var mySigningKey = []byte("secret")
 
+type Claims struct {
+	Username string `json:"username"`
+	// recommended having
+	jwt.StandardClaims
+}
+
 /* Handlers */
 var GetTokenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	/* Create the token */
-	token := jwt.New(jwt.SigningMethodHS256)
+	expireToken := time.Now().Add(time.Hour * 1).Unix()
+	expireCookie := time.Now().Add(time.Hour * 1)
 
 	/* Create a map to store our claims*/
-	claims := token.Claims.(jwt.MapClaims)
-
-	/* Set token claims */
-	claims["iss"] = "golang"
-	claims["name"] = "Ado Kukic"
-	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	claims := Claims{
+		"myusername",
+		jwt.StandardClaims{
+			ExpiresAt: expireToken,
+			Issuer:    "localhost:9000",
+		},
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	/* Sign the token with our secret */
 	tokenString, _ := token.SignedString(mySigningKey)
-
+	// Place the token in the client's cookie
+	cookie := http.Cookie{Name: "Auth", Value: tokenString, Expires: expireCookie, HttpOnly: true}
+	http.SetCookie(w, &cookie)
 	/* Finally, write the token to the browser window */
 	w.Write([]byte(tokenString))
 })
 
-var jwtMiddleware = jwtmiddleware.New(jwtmiddleware.Options{
-	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
-		return mySigningKey, nil
-	},
-	SigningMethod: jwt.SigningMethodHS256,
-})
+func authMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// If no Auth cookie is set then return a 404 not found
+		cookie, err := r.Cookie("Auth")
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Return a Token using the cookie
+		token, err := jwt.ParseWithClaims(cookie.Value, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+			// Make sure token's signature wasn't changed
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected siging method")
+			}
+			return []byte("secret"), nil
+		})
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Token is not valid:", token)
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized"))
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
+}
 
 type Product struct {
 	Id          int

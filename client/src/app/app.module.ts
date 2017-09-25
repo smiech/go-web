@@ -10,20 +10,24 @@ import { NavMenuComponent } from './components/navmenu/navmenu.component';
 
 import { AuthService } from './services/auth.service';
 import { PersistenceService } from './services/persistence.service';
-import { HomeComponent } from './home/home.component';
+import { HomeComponent } from './components/home/home.component';
+import { UserspaceComponent } from './components/userspace/userspace.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     LoginComponent,
     NavMenuComponent,
-    HomeComponent
+    HomeComponent,
+    UserspaceComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule,
     RouterModule.forRoot([
+      { path: '', redirectTo: 'home', pathMatch:'full'  },
+      { path: 'home', component: HomeComponent },
       { path: 'login', component: LoginComponent },
       { path: 'login/:email', component: LoginComponent },
     ]),

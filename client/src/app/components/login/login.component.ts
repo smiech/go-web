@@ -23,7 +23,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
     public ngOnInit(): void {
         if (this.authService.checkLogin()) {
-            this.router.navigate(['/measures']);
+            this.router.navigate(['/userspace']);
         }
 
         this.route.params.subscribe(params => {
@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
             this.showLoginError = false;
             if (this.router) {
 
-                this.router.navigate(['/app']);
+                this.router.navigate(['/userspace']);
             };
         }
     }
