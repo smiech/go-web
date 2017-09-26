@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -14,6 +15,11 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 )
+
+const username string = "adam"
+const password string = "enter"
+
+var port string = "8080"
 
 type Device struct {
 	Id   string
@@ -40,15 +46,14 @@ func load(title string) (*Device, error) {
 
 var store = sessions.NewCookieStore([]byte("dwadziescia-muharadzinow-bije-trzech-rabinow"))
 
-func configureLogger() {
+func configureLogger() io.Writer {
 	f, err := os.OpenFile("log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		fmt.Printf("error opening file: %v", err)
 	}
-
-	defer f.Close()
 	log.SetOutput(f)
-	log.Println("hello")
+	log.Println("Logging configured")
+	return f
 }
 
 func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
@@ -86,16 +91,19 @@ func tokenAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	configureLogger()
-
+	fileWriter := configureLogger()
+	port = os.Getenv("HTTP_PLATFORM_PORT")
+	if port == "" {
+		port = "8080"
+	}
 	r := mux.NewRouter()
 	de := Device{Id: "aa", Name: "bb"}
 	de.save()
 
-	r.Handle("/get-token", GetTokenHandler).Methods("GET")
+	r.Handle("/login", loginHandler).Methods("POST")
 	r.Handle("/status", authMiddleware(ProductsHandler)).Methods("GET")
-	r.PathPrefix("/").Handler(authMiddleware(http.FileServer(http.Dir("./client/dist/"))))
-	http.ListenAndServe(":8080", handlers.LoggingHandler(os.Stdout, r))
+	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./client/dist/")))
+	http.ListenAndServe(":"+port, handlers.LoggingHandler(fileWriter, r))
 }
 
 /* Set up a global string for our secret */
@@ -108,17 +116,27 @@ type Claims struct {
 }
 
 /* Handlers */
-var GetTokenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	/* Create the token */
+	log.Printf("login handler invoked")
+	r.ParseForm()
+	for key, values := range r.PostForm {
+		log.Printf("k: %v v: %v", key, values)
+	}
+	if r.FormValue("Username") != username && r.FormValue("Password") != password {
+		w.WriteHeader(http.StatusForbidden)
+		log.Printf("Error in request")
+		return
+	}
 	expireToken := time.Now().Add(time.Hour * 1).Unix()
 	expireCookie := time.Now().Add(time.Hour * 1)
 
 	/* Create a map to store our claims*/
 	claims := Claims{
-		"myusername",
+		username,
 		jwt.StandardClaims{
 			ExpiresAt: expireToken,
-			Issuer:    "localhost:9000",
+			Issuer:    "localhost:" + port,
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -130,6 +148,7 @@ var GetTokenHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reque
 	http.SetCookie(w, &cookie)
 	/* Finally, write the token to the browser window */
 	w.Write([]byte(tokenString))
+	http.Redirect(w, r, "/home", http.StatusAccepted)
 })
 
 func authMiddleware(next http.Handler) http.Handler {
