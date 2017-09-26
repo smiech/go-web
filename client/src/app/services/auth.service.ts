@@ -21,7 +21,7 @@ export class AuthService {
     public login(userName: string, password: string): Promise<AuthRequestResult> {
         let body = { Username: userName, Password: password };
 
-        return this.http.post('/api/tokenauth', body).toPromise()
+        return this.http.post('/login ', body).toPromise()
             .then(response => {
                 let result = response.json() as AuthRequestResult;
                 if (result.State == 1) {
