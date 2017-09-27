@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
@@ -18,6 +19,7 @@ import (
 
 const username string = "adam"
 const password string = "enter"
+const wwwRoot = "./client/dist/"
 
 var port string = "8080"
 
@@ -99,11 +101,33 @@ func main() {
 	r := mux.NewRouter()
 	de := Device{Id: "aa", Name: "bb"}
 	de.save()
+	r.Handle("/api/v1/login", loginHandler).Methods("POST")
+	r.Handle("/api/v1/status", authMiddleware(ProductsHandler)).Methods("GET")
 
-	r.Handle("/login", loginHandler).Methods("POST")
-	r.Handle("/status", authMiddleware(ProductsHandler)).Methods("GET")
-	r.PathPrefix("/").Handler(http.FileServer(http.Dir("./client/dist/")))
+	r.HandleFunc("/", indexHandler)
+	r.PathPrefix("/").HandlerFunc(staticHandler)
+
 	http.ListenAndServe(":"+port, handlers.LoggingHandler(fileWriter, r))
+}
+
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, wwwRoot+"index.html")
+}
+
+func staticHandler(w http.ResponseWriter, r *http.Request) {
+	requestPath := r.URL.Path
+	fileSystemPath := wwwRoot + r.URL.Path
+	endURIPath := strings.Split(requestPath, "/")[len(strings.Split(requestPath, "/"))-1]
+	splitPath := strings.Split(endURIPath, ".")
+	if len(splitPath) > 1 {
+		if f, err := os.Stat(fileSystemPath); err == nil && !f.IsDir() {
+			http.ServeFile(w, r, fileSystemPath)
+			return
+		}
+		http.NotFound(w, r)
+		return
+	}
+	http.ServeFile(w, r, wwwRoot+"index.html")
 }
 
 /* Set up a global string for our secret */
