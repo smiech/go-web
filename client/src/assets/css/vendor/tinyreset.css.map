@@ -1,0 +1,8 @@
+{
+"version": 3,
+"mappings": "AACA,+DAA+D;AAC/D;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;KA6EM;EACF,MAAM,EAAE,CAAC;EACT,OAAO,EAAE,CAAC;EACV,MAAM,EAAE,CAAC;EACT,SAAS,EAAE,IAAI;EACf,IAAI,EAAE,OAAO;EACb,cAAc,EAAE,QAAQ;;AAG5B;;;;;;;;;;OAUQ;EACJ,OAAO,EAAE,KAAK;;AAGlB,IAAK;EACD,WAAW,EAAE,CAAC;;AAGlB;EACG;EACC,UAAU,EAAE,IAAI;;AAGpB;CACE;EACE,MAAM,EAAE,IAAI;EAEZ;;SACQ;IACJ,OAAO,EAAE,EAAE;IACX,OAAO,EAAE,IAAI;;AAGrB,KAAM;EACF,eAAe,EAAE,QAAQ;EACzB,cAAc,EAAE,CAAC",
+"sources": ["/assets/css/vendor/tinyreset.scss"],
+"sourcesContent": ["/*! tinyreset.css v0.1.0 | github.com/shankariyerr/tinyreset */\nhtml,\nbody,\ndiv,\nspan,\niframe,\nblockquote,\npre,\na,\nh1,\nh2,\nh3,\nh4,\nh5,\nh6,\np,\nabbr,\nacronym,\naddress,\nbig,\ncite,\ncode,\ndel,\ndfn,\nem,\nimg,\nins,\nkbd,\nq,\ns,\nsamp,\nsmall,\nstrike,\nstrong,\nsub,\nsup,\ntt,\nvar,\nb,\nu,\ni,\ncenter,\ndl,\ndt,\ndd,\nol,\nul,\nli,\nfieldset,\nform,\nlabel,\nlegend,\ntable,\ncaption,\ntbody,\ntfoot,\nthead,\ntr,\nth,\ntd,\narticle,\naside,\ncanvas,\ndetails,\nembed,\nfigure,\nfigcaption,\nfooter,\nheader,\nhgroup,\nmenu,\nnav,\noutput,\nsection,\nsummary,\ntime,\nmark,\naudio,\nvideo {\n    margin: 0;\n    padding: 0;\n    border: 0;\n    font-size: 100%;\n    font: inherit;\n    vertical-align: baseline;\n}\n\narticle,\naside,\ndetails,\nfigcaption,\nfigure,\nfooter,\nheader,\nhgroup,\nmenu,\nnav,\nsection {\n    display: block;\n}\n\nbody {\n    line-height: 1;\n}\n\nol,\nul {\n    list-style: none;\n}\n\nblockquote,\nq {\n    quotes: none;\n\n    &:before,\n    &:after {\n        content: '';\n        content: none;\n    }\n}\ntable {\n    border-collapse: collapse;\n    border-spacing: 0;\n}\n"],
+"names": [],
+"file": "tinyreset.scss"
+}

@@ -1,0 +1,59 @@
+table {
+  border-collapse: collapse;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(0, 0, 0, 0.03); }
+  table col.account {
+    background: transparent; }
+  table .pm-role-group {
+    background: #008dcc;
+    color: white;
+    border-left-color: rgba(255, 255, 255, 0.3);
+    font-size: 0.875rem;
+    letter-spacing: 0.0625rem; }
+  table .pm-role-group__riskplan {
+    background: #299fd4; }
+  table .pm-role-group__extra {
+    background: #52b1dc; }
+  table .pm-table-axis + .pm-role-group {
+    border-left-color: rgba(0, 0, 0, 0.03); }
+  table col.extra {
+    background: transparent; }
+  table tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03); }
+  table th,
+  table td {
+    padding: 0.5rem 1rem; }
+    table th + th,
+    table th + td,
+    table td + th,
+    table td + td {
+      border-left: 1px solid rgba(0, 0, 0, 0.03); }
+  table th {
+    color: rgba(0, 0, 0, 0.6); }
+  table thead tr {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03); }
+  table thead th {
+    vertical-align: top; }
+  table .pm-table-axis span {
+    display: block; }
+  table tbody tr:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.25); }
+  table tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.02); }
+  table .pm-table-axis {
+    width: 800px; }
+  table .pm-role {
+    width: 500px; }
+
+.pm-table-group th {
+  font-weight: 500;
+  padding-top: 2rem; }
+
+.fa-check {
+  color: #39b54a; }
+
+.fa-eye {
+  color: #008dcc; }
+
+/*# sourceMappingURL=pm-rights.css.map */

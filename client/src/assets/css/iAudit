@@ -1,0 +1,21 @@
+iAudit
+
+API access only with premium accounts
+https://safetyculture.com/pricing/
+
+- Prijstechnisch is typform goedkoper, daar kan je iemand uitnodigen om een audit uit te voeren (dit kan niet in iAudit, alleen paid safety culture users)
+- Wufoo ook webhooks & API
+
+Share only for standard accounts
+
+An user is an emailaddress, an user can have 3 connected devices
+
+API - Action depinding on our services
+
+Webhook - Action is trigger by their services
+
+iAudit kan taken maken vanuit een audit, ook kan bij een vraag foto's en een notitie worden toegevoegd, dit kan niet bij een fomulier oplossing zoals Typform of Wufoo
+
+Rapport is te delen met iemand anders via een link
+
+iAudit kan goede data verzamelen, zoals locatie, taken

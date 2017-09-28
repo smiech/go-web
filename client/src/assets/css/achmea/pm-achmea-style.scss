@@ -1,0 +1,209 @@
+$font-weight-bold: bold;
+
+// Centraalbeheer
+$body-cb-font-family : Verdana, Geneva, "sans-serif";
+$header-cb-font-family : FranklinGothicMedium, Verdana, Geneva, "sans-serif";
+$achmea-cb-orange : #f86200;
+$achmea-cb-blue : #0050f0;
+$achmea-cb-green : #00b332;
+$hyperlink-cb : $achmea-cb-blue;
+$hyperlink-cb-visited : $achmea-cb-blue;
+$hyperlink-cb-hover : $achmea-cb-blue;
+
+// Avero
+$body-avero-font-family : "Helvetica Neue", Helvetica, Arial, sans-serif;
+$header-avero-font-family : 'Agenda-Semibold', sans-serif;
+$achmea-avero-orange : #f86200;
+$achmea-avero-blue : #0050f0;
+$achmea-avero-red : #E13214;
+$hyperlink-avero : $achmea-avero-red;
+$hyperlink-avero-visited : $achmea-avero-red;
+$hyperlink-avero-hover : $achmea-avero-red;
+
+@import "_font-agenda";
+
+.pm-achmea {
+    &.pm-page-public {
+        background-image: url('monitor-cb2.jpg');
+    }
+    .pm-signup__form, .pm-signin__form {
+        border-radius: 0px;
+        background-color: rgba(#fff,1);
+    }
+}
+
+.pm-achmea--cb.pm-page-public {
+    font-family: $body-cb-font-family;
+    h1, h2, h3, h4, h5, h6 {
+        font-family: $header-cb-font-family;
+    }
+    a, .pm-link {
+        color: $hyperlink-cb;
+        text-decoration: none;
+        &:visited {
+            color: $hyperlink-cb-visited;
+        }
+        &:hover {
+            color: $hyperlink-cb-hover;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        &.not_visited:visited {
+            color: $hyperlink-cb;
+        }
+        &.not_visited:hover {
+            color: $hyperlink-cb-hover;
+        }
+        &.no_underline {
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+        &.fa {
+            text-decoration: none;
+        }
+    }
+    .pm-button {
+        font-weight: $font-weight-bold;
+        &:active {
+            box-shadow: none;
+        }
+        &:hover {
+            text-decoration: none;
+        }
+        &.is_disabled, :disabled, &.slick-disabled {
+            background-color: lightgrey;
+            color: grey;
+            &:hover {
+                cursor: not-allowed;
+                background-color: lightgrey;
+                color: grey;
+            }
+            &:active {
+                box-shadow: none;
+            }
+        }
+    }
+    .pm-button--primary {
+        color: white;
+        background: $achmea-cb-orange;
+        &:hover {
+            border-color: $achmea-cb-orange;
+            color: $achmea-cb-orange;
+            background: white;
+        }
+        &:visited {
+            color: white;
+        }
+        &:active {
+            background-color: tint($achmea-cb-orange, 90%);
+        }
+    }
+    .pm-button--faceless {
+        font-weight: normal;
+        &:hover {
+            color: $hyperlink-cb-hover;
+            text-decoration: underline;
+        }
+    }
+    .pm-signup__form, .pm-signin__form {
+        h2 {
+            color: $achmea-cb-green;
+            font-weight: $font-weight-bold;
+        }
+    }
+    .pm-input-group-label {
+        color: $achmea-cb-green;
+        label.pm-fv-smallcaps {
+            font-weight: $font-weight-bold;
+        }
+    }
+}
+
+.pm-achmea--avero.pm-page-public {
+    font-family: $body-avero-font-family;
+    h1, h2, h3, h4, h5, h6 {
+        font-family: $header-avero-font-family;
+    }
+    a, .pm-link {
+        color: $hyperlink-avero;
+        text-decoration: none;
+        &:visited {
+            color: $hyperlink-avero-visited;
+        }
+        &:hover {
+            color: $hyperlink-avero-hover;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        &.not_visited:visited {
+            color: $hyperlink-avero;
+        }
+        &.not_visited:hover {
+            color: $hyperlink-avero-hover;
+        }
+        &.no_underline {
+            text-decoration: none;
+            &:hover {
+                text-decoration: underline;
+            }
+        }
+        &.fa {
+            text-decoration: none;
+        }
+    }
+    .pm-button {
+        font-weight: $font-weight-bold;
+        &:active {
+            box-shadow: none;
+        }
+        &:hover {
+            text-decoration: none;
+        }
+        &.is_disabled, :disabled, &.slick-disabled {
+            background-color: lightgrey;
+            color: grey;
+            &:hover {
+                cursor: not-allowed;
+                background-color: lightgrey;
+                color: grey;
+            }
+            &:active {
+                box-shadow: none;
+            }
+        }
+    }
+    .pm-button--primary {
+        color: white;
+        background: $achmea-avero-red;
+        &:hover {
+            background-color: shade($achmea-avero-red, 10%);
+        }
+        &:visited {
+            color: white;
+        }
+        &:active {
+            background-color: shade($achmea-avero-red, 10%);
+        }
+    }
+    .pm-button--faceless {
+        font-weight: normal;
+        &:hover {
+            color: $hyperlink-avero-hover;
+            text-decoration: underline;
+        }
+    }
+    .pm-signup__form, .pm-signin__form {
+        h2 {
+            color: $achmea-avero-red;
+            font-weight: $font-weight-bold;
+        }
+    }
+    .pm-input-group-label {
+        color: $achmea-avero-red;
+        label.pm-fv-smallcaps {
+            font-weight: $font-weight-bold;
+        }
+    }
+}

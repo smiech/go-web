@@ -1,0 +1,21 @@
+/* Write your CSS! */
+.pm-page-public {
+  background: url(../helloquence-61189.jpg) no-repeat;
+  background-size: cover; }
+  .pm-page-public .pm-signup__form, .pm-page-public .pm-signin__form {
+    margin-top: 6rem;
+    margin-bottom: 6rem;
+    padding: 24px 32px 24px;
+    border-radius: 3px;
+    background-color: rgba(255, 255, 255, 0.97);
+    box-shadow: 0 0 10px 0 rgba(33, 30, 36, 0.2); }
+    @media only screen and (max-width: 769px) {
+      .pm-page-public .pm-signup__form, .pm-page-public .pm-signin__form {
+        margin-top: 2.5rem;
+        margin-bottom: 2.5rem;
+        margin-left: auto;
+        padding: 16px;
+        width: auto;
+        left: auto; } }
+
+/*# sourceMappingURL=pm-public.css.map */

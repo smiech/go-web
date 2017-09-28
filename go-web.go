@@ -21,6 +21,10 @@ const username string = "adam"
 const password string = "enter"
 const wwwRoot = "./client/dist/"
 
+// var domain = "localhost"
+// var httpPort = "8080"
+// var httpsPort = "8443"
+
 var port string = "8080"
 
 type Device struct {
@@ -93,14 +97,22 @@ func tokenAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	fileWriter := configureLogger()
+	env := os.Args
+	var fileWriter io.Writer
+	envLength := len(env)
+	if envLength > 0 && env[envLength-1] == "debug" {
+		fileWriter = os.Stdout
+	} else {
+		fileWriter = configureLogger()
+	}
 	port = os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {
 		port = "8080"
 	}
+
 	r := mux.NewRouter()
-	de := Device{Id: "aa", Name: "bb"}
-	de.save()
+	//de := Device{Id: "aa", Name: "bb"}
+	//de.save()
 	r.Handle("/api/v1/login", loginHandler).Methods("POST")
 	r.Handle("/api/v1/status", authMiddleware(ProductsHandler)).Methods("GET")
 
@@ -109,6 +121,11 @@ func main() {
 
 	http.ListenAndServe(":"+port, handlers.LoggingHandler(fileWriter, r))
 }
+
+// Redirect all traffic to HTTPS
+// func redirectHandler(w http.ResponseWriter, r *http.Request) {
+// 	http.Redirect(w, r, "https://"+domain+":"+httpsPort+r.RequestURI, http.StatusMovedPermanently)
+// }
 
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, wwwRoot+"index.html")

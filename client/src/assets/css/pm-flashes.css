@@ -1,0 +1,130 @@
+[class^='pm-flash-'],
+[class*='pm-flash-'] {
+  display: block;
+  padding: 0.75rem;
+  border: 1px solid;
+  position: relative;
+  text-align: center; }
+  [class^='pm-flash-'].has_close,
+  [class*='pm-flash-'].has_close {
+    padding-right: 2.5rem; }
+  [class^='pm-flash-'] + [class^='pm-flash-'], [class^='pm-flash-'] + [class*='pm-flash-'],
+  [class*='pm-flash-'] + [class^='pm-flash-'],
+  [class*='pm-flash-'] + [class*='pm-flash-'] {
+    margin-top: 1rem; }
+
+.pm-flash-alert {
+  background-color: #fff5e6;
+  color: #cc7800;
+  border-color: #ffeacc; }
+  .pm-flash-alert a {
+    text-decoration: underline; }
+  .pm-flash-alert .pm-button--cta {
+    text-decoration: none;
+    color: white; }
+    .pm-flash-alert .pm-button--cta:focus, .pm-flash-alert .pm-button--cta:hover {
+      color: white; }
+  .pm-flash-alert a,
+  .pm-flash-alert .pm-flash__close {
+    color: #b36900;
+    cursor: pointer; }
+    .pm-flash-alert a:focus, .pm-flash-alert a:hover,
+    .pm-flash-alert .pm-flash__close:focus,
+    .pm-flash-alert .pm-flash__close:hover {
+      color: #804b00; }
+
+.pm-flash-error {
+  background-color: #fde8e9;
+  color: #be161d;
+  border-color: #fbd2d3; }
+  .pm-flash-error a {
+    text-decoration: underline; }
+  .pm-flash-error .pm-button--cta {
+    text-decoration: none;
+    color: white; }
+    .pm-flash-error .pm-button--cta:focus, .pm-flash-error .pm-button--cta:hover {
+      color: white; }
+  .pm-flash-error a,
+  .pm-flash-error .pm-flash__close {
+    color: #a61419;
+    cursor: pointer; }
+    .pm-flash-error a:focus, .pm-flash-error a:hover,
+    .pm-flash-error .pm-flash__close:focus,
+    .pm-flash-error .pm-flash__close:hover {
+      color: #770e12; }
+
+.pm-flash-notice {
+  background-color: #e6f4fa;
+  color: #0071a3;
+  border-color: #cce8f5; }
+  .pm-flash-notice a {
+    text-decoration: underline; }
+  .pm-flash-notice .pm-button--cta {
+    text-decoration: none;
+    color: white; }
+    .pm-flash-notice .pm-button--cta:focus, .pm-flash-notice .pm-button--cta:hover {
+      color: white; }
+  .pm-flash-notice a,
+  .pm-flash-notice .pm-flash__close {
+    color: #00638f;
+    cursor: pointer; }
+    .pm-flash-notice a:focus, .pm-flash-notice a:hover,
+    .pm-flash-notice .pm-flash__close:focus,
+    .pm-flash-notice .pm-flash__close:hover {
+      color: #004766; }
+
+.pm-flash-success {
+  background-color: #ebf8ed;
+  color: #2e913b;
+  border-color: #d7f0db; }
+  .pm-flash-success a {
+    text-decoration: underline; }
+  .pm-flash-success .pm-button--cta {
+    text-decoration: none;
+    color: white; }
+    .pm-flash-success .pm-button--cta:focus, .pm-flash-success .pm-button--cta:hover {
+      color: white; }
+  .pm-flash-success a,
+  .pm-flash-success .pm-flash__close {
+    color: #287f34;
+    cursor: pointer; }
+    .pm-flash-success a:focus, .pm-flash-success a:hover,
+    .pm-flash-success .pm-flash__close:focus,
+    .pm-flash-success .pm-flash__close:hover {
+      color: #1d5b25; }
+
+.pm-flash-subtle {
+  background-color: whitesmoke;
+  color: #7a7a7a;
+  border-color: #ebebeb; }
+  .pm-flash-subtle a {
+    text-decoration: underline; }
+  .pm-flash-subtle .pm-button--cta {
+    text-decoration: none;
+    color: white; }
+    .pm-flash-subtle .pm-button--cta:focus, .pm-flash-subtle .pm-button--cta:hover {
+      color: white; }
+  .pm-flash-subtle a,
+  .pm-flash-subtle .pm-flash__close {
+    color: #6b6b6b;
+    cursor: pointer; }
+    .pm-flash-subtle a:focus, .pm-flash-subtle a:hover,
+    .pm-flash-subtle .pm-flash__close:focus,
+    .pm-flash-subtle .pm-flash__close:hover {
+      color: #4d4d4d; }
+
+.pm-flash__close {
+  position: absolute;
+  background-color: transparent;
+  border: 1px solid transparent;
+  right: 0.5rem;
+  top: 0.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: .75;
+  padding: 0;
+  height: 30px;
+  width: 30px;
+  vertical-align: top; }
+
+/*# sourceMappingURL=pm-flashes.css.map */
