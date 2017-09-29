@@ -1,35 +1,10 @@
-<div style="width: 100%; height: 100%;"
-[style.background-image]="backgroundImage"  
-[style.background-size]="backgroundSize" 
-[style.background-repeat]="backgroundRepeat"
-class="pm-page {{publicPageClass}}">
+<div style="width: 100%; height: 100%;" [style.background-image]="backgroundImage" [style.background-size]="backgroundSize"
+  [style.background-repeat]="backgroundRepeat" class="pm-page {{publicPageClass}}">
 
-<header class="pm-page__header">
-   <div class="pm-container pm-grid">
-       <div class="pm-grid-cell--6">
-           <figure class="pm-account-logo">
-               <img src="/assets/legaandgenerallogo.png" alt="Centraal Beheer Achmea">
-               <figcaption>Centraal Beheer Achmea</figcaption>
-           </figure>
-       </div>
-       <div class="pm-grid-cell--6">
-           <ul class="pm-client pm-fs-small">
-               <li class="hover-menu" *ngIf="showLogout">
-                   <span class="hover-menu-item" (click)="showMenu()">{{ userName }} <i class="fa fa-caret-down"></i></span>
-                   <div #menuSpan class="submenu pm-submenu-right">
-                       <ul>
-                           <li><a (click)="logout()">Uitloggen</a></li>
-                       </ul>
-                   </div>
-               </li>
-           </ul>
-       </div>
-   </div>
-</header>
-<div role="main">
-   <router-outlet></router-outlet>
-   <footer class="pm-page_footer pm-container pm-grid">
-       <div class="pm-grid-cell--12" *ngIf="showLogout">Powered by <img class="pm-oodit-logo" src="/assets/logo_oodit.svg" alt="Oodit riskplan"></div>
-   </footer>
-</div>
+  <div role="main">
+    <router-outlet></router-outlet>
+    <footer class="pm-page_footer pm-container pm-grid">
+      <div class="pm-grid-cell--12" *ngIf="showLogout">Powered by <img class="pm-oodit-logo" src="/assets/logo_oodit.svg" alt="Oodit riskplan"></div>
+    </footer>
+  </div>
 </div>

@@ -1,4 +1,28 @@
+<header class="pm-page__header">
+        <div class="pm-container pm-grid">
+            <div class="pm-grid-cell--6">
+                <figure class="pm-account-logo">
+                    <img src="/assets/legaandgenerallogo.png" alt="Centraal Beheer Achmea">
+                    <figcaption>Centraal Beheer Achmea</figcaption>
+                </figure>
+            </div>
+            <div class="pm-grid-cell--6">
+                <ul class="pm-client pm-fs-small">
+                    <li class="hover-menu" *ngIf="showLogout">
+                        <span class="hover-menu-item" (click)="showMenu()">{{ userName }} <i class="fa fa-caret-down"></i></span>
+                        <div #menuSpan class="submenu pm-submenu-right">
+                            <ul>
+                                <li><a (click)="logout()">Uitloggen</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+     </header>
+
 <div class='container-fluid'>
+      
     <div class="row">
         <router-outlet></router-outlet>
     </div>
