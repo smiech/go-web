@@ -87,6 +87,11 @@ type User struct {
 	ServiceCookies map[string]string
 }
 
+type Credentials struct {
+	Username string
+	Password string
+}
+
 type AuthenticateResponse struct {
 	IsSuccessful bool
 	User         User
@@ -100,26 +105,38 @@ func main() {
 	env := os.Args
 	var fileWriter io.Writer
 	envLength := len(env)
-	if envLength > 0 && env[envLength-1] == "debug" {
+	if envLength > 0 && env[envLength-1] == "debug" || os.Getenv("debug") == "true" {
 		fileWriter = os.Stdout
 	} else {
 		fileWriter = configureLogger()
 	}
 	port = os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {
-		port = "8080"
+		port = os.Getenv("port")
+		if port == "" {
+			port = "8080"
+		}
+
 	}
 
 	r := mux.NewRouter()
 	//de := Device{Id: "aa", Name: "bb"}
 	//de.save()
-	r.Handle("/api/v1/login", loginHandler).Methods("POST")
+	r.Handle("/api/v1/login", loginHandler).Methods("POST", "OPTIONS")
+	//r.Handle("/api/v1/login", optionHandler).Methods("OPTIONS")
 	r.Handle("/api/v1/status", authMiddleware(ProductsHandler)).Methods("GET")
 
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/").HandlerFunc(staticHandler)
 
-	http.ListenAndServe(":"+port, handlers.LoggingHandler(fileWriter, r))
+	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With",
+		"Accept", "Accept-Language", "Content-Language", "Origin", "Content-Type",
+	})
+	originsOk := handlers.AllowedOrigins([]string{"*"})
+	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+	corsHandler := handlers.CORS(originsOk, headersOk, methodsOk)(r)
+	log.Printf("%v", http.ListenAndServe(":"+port, handlers.LoggingHandler(fileWriter, corsHandler)))
+
 }
 
 // Redirect all traffic to HTTPS
@@ -156,15 +173,25 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
+func GetCredentials(reqBody io.ReadCloser) Credentials {
+	decoder := json.NewDecoder(reqBody)
+	var t Credentials
+	err := decoder.Decode(&t)
+	if err != nil {
+		panic(err)
+	}
+	defer reqBody.Close()
+	return t
+}
+
 /* Handlers */
 var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	/* Create the token */
 	log.Printf("login handler invoked")
-	r.ParseForm()
-	for key, values := range r.PostForm {
-		log.Printf("k: %v v: %v", key, values)
-	}
-	if r.FormValue("Username") != username && r.FormValue("Password") != password {
+
+	credentials := GetCredentials(r.Body)
+
+	if credentials.Username != username && credentials.Password != password {
 		w.WriteHeader(http.StatusForbidden)
 		log.Printf("Error in request")
 		return
