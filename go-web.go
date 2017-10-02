@@ -197,7 +197,7 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	expireToken := time.Now().Add(time.Hour * 1).Unix()
-	expireCookie := time.Now().Add(time.Hour * 1)
+	//expireCookie := time.Now().Add(time.Hour * 1)
 
 	/* Create a map to store our claims*/
 	claims := Claims{
@@ -212,11 +212,24 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 	/* Sign the token with our secret */
 	tokenString, _ := token.SignedString(mySigningKey)
 	// Place the token in the client's cookie
-	cookie := http.Cookie{Name: "Auth", Value: tokenString, Expires: expireCookie, HttpOnly: true}
-	http.SetCookie(w, &cookie)
-	/* Finally, write the token to the browser window */
-	w.Write([]byte(tokenString))
-	http.Redirect(w, r, "/home", http.StatusAccepted)
+	//cookie := http.Cookie{Name: "Auth", Value: tokenString, Expires: expireCookie, HttpOnly: false}
+	resp := AuthRequestResult{
+		State: 1,
+		Data:  DataStruct{AccessToken: tokenString, User: User{Name: "Adam"}},
+	}
+	payload, err := json.Marshal(resp)
+	log.Printf("%v", err)
+	check := AuthRequestResult{}
+	json.Unmarshal(payload, &check)
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(payload))
+
+	// AuthRequestResult {
+	// 	State: number;
+	// 	Msg: string;
+	// 	Data: Object;
+	// }
+
 })
 
 func authMiddleware(next http.Handler) http.Handler {
@@ -250,6 +263,17 @@ func authMiddleware(next http.Handler) http.Handler {
 			next.ServeHTTP(w, r)
 		}
 	})
+}
+
+type DataStruct struct {
+	AccessToken string `json:"accessToken"`
+	User        User   `json:"user"`
+}
+
+type AuthRequestResult struct {
+	State int
+	Msg   string
+	Data  DataStruct
 }
 
 type Product struct {

@@ -6,6 +6,7 @@ import { Injectable } from "@angular/core";
 import { Headers, Http } from "@angular/http";
 import "rxjs/add/operator/toPromise";
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Injectable()
 export class AuthService {
@@ -21,7 +22,7 @@ export class AuthService {
     public login(userName: string, password: string): Promise<AuthRequestResult> {
         let body = { Username: userName, Password: password };
 
-        return this.http.post('/login ', body).toPromise()
+        return this.http.post(environment.apiUrls.login, body).toPromise()
             .then(response => {
                 let result = response.json() as AuthRequestResult;
                 if (result.State == 1) {
@@ -124,7 +125,7 @@ export class AuthService {
         if (token == null) {
             if (redirectIfNoToken) {
                 this.logout();
-                this.router.navigate['/login']
+                this.router.navigate[environment.apiUrls.login]
             } else {
                 throw 'No token';
             }

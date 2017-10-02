@@ -12,6 +12,7 @@ import { AuthService } from './services/auth.service';
 import { PersistenceService } from './services/persistence.service';
 import { HomeComponent } from './components/home/home.component';
 import { UserspaceComponent } from './components/userspace/userspace.component';
+import { environment } from '../environments/environment'
 
 @NgModule({
   declarations: [
@@ -26,12 +27,12 @@ import { UserspaceComponent } from './components/userspace/userspace.component';
     FormsModule,
     HttpModule,
     RouterModule.forRoot([
-      { path: '', redirectTo: 'home', pathMatch:'full'  },
-      { path: 'home', component: HomeComponent },
-      { path: 'login', component: LoginComponent },
-      { path: 'login/:email', component: LoginComponent },
+      { path: '', redirectTo: environment.urls.home, pathMatch: 'full' },
+      { path: environment.urls.home, component: HomeComponent },
+      { path: environment.urls.login, component: LoginComponent },
+      { path: environment.urls.userspace, component: UserspaceComponent },
     ]),
-   
+
   ],
   providers: [AuthService, PersistenceService],
   bootstrap: [AppComponent]
