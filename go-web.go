@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	m "github.com/adam72m/go-web/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -26,29 +26,6 @@ const wwwRoot = "./client/dist/"
 // var httpsPort = "8443"
 
 var port string = "8080"
-
-type Device struct {
-	Id   string
-	Name string
-}
-
-func (p *Device) save() error {
-	res1B, _ := json.Marshal(p)
-	fmt.Println(string(res1B))
-	filename := "devices.json"
-	return ioutil.WriteFile(filename, res1B, 0600)
-}
-
-func load(title string) (*Device, error) {
-	filename := "devices.json"
-	device := Device{}
-	body, err := ioutil.ReadFile(filename)
-	json.Unmarshal(body, &device)
-	if err != nil {
-		return nil, err
-	}
-	return &Device{Id: device.Id, Name: device.Name}, nil
-}
 
 var store = sessions.NewCookieStore([]byte("dwadziescia-muharadzinow-bije-trzech-rabinow"))
 
@@ -78,23 +55,6 @@ func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.Ha
 
 		fn(w, r)
 	}
-}
-
-type User struct {
-	Guid           string
-	Name           string
-	Email          string
-	ServiceCookies map[string]string
-}
-
-type Credentials struct {
-	Username string
-	Password string
-}
-
-type AuthenticateResponse struct {
-	IsSuccessful bool
-	User         User
 }
 
 func tokenAuth(w http.ResponseWriter, r *http.Request) {
@@ -167,15 +127,9 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 /* Set up a global string for our secret */
 var mySigningKey = []byte("secret")
 
-type Claims struct {
-	Username string `json:"username"`
-	// recommended having
-	jwt.StandardClaims
-}
-
-func GetCredentials(reqBody io.ReadCloser) Credentials {
+func GetCredentials(reqBody io.ReadCloser) m.Credentials {
 	decoder := json.NewDecoder(reqBody)
-	var t Credentials
+	var t m.Credentials
 	err := decoder.Decode(&t)
 	if err != nil {
 		panic(err)
@@ -200,7 +154,7 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 	//expireCookie := time.Now().Add(time.Hour * 1)
 
 	/* Create a map to store our claims*/
-	claims := Claims{
+	claims := m.Claims{
 		username,
 		jwt.StandardClaims{
 			ExpiresAt: expireToken,
@@ -213,23 +167,16 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 	tokenString, _ := token.SignedString(mySigningKey)
 	// Place the token in the client's cookie
 	//cookie := http.Cookie{Name: "Auth", Value: tokenString, Expires: expireCookie, HttpOnly: false}
-	resp := AuthRequestResult{
+	resp := m.AuthRequestResult{
 		State: 1,
-		Data:  DataStruct{AccessToken: tokenString, User: User{Name: "Adam"}},
+		Data:  m.DataStruct{AccessToken: tokenString, User: m.User{Name: "Adam"}},
 	}
 	payload, err := json.Marshal(resp)
 	log.Printf("%v", err)
-	check := AuthRequestResult{}
+	check := m.AuthRequestResult{}
 	json.Unmarshal(payload, &check)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(payload))
-
-	// AuthRequestResult {
-	// 	State: number;
-	// 	Msg: string;
-	// 	Data: Object;
-	// }
-
 })
 
 func authMiddleware(next http.Handler) http.Handler {
@@ -242,7 +189,7 @@ func authMiddleware(next http.Handler) http.Handler {
 		}
 
 		// Return a Token using the cookie
-		token, err := jwt.ParseWithClaims(cookie.Value, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(cookie.Value, &m.Claims{}, func(token *jwt.Token) (interface{}, error) {
 			// Make sure token's signature wasn't changed
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected siging method")
@@ -265,32 +212,14 @@ func authMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-type DataStruct struct {
-	AccessToken string `json:"accessToken"`
-	User        User   `json:"user"`
-}
-
-type AuthRequestResult struct {
-	State int
-	Msg   string
-	Data  DataStruct
-}
-
-type Product struct {
-	Id          int
-	Name        string
-	Slug        string
-	Description string
-}
-
 /* We will create our catalog of VR experiences and store them in a slice. */
-var products = []Product{
-	Product{Id: 1, Name: "Hover Shooters", Slug: "hover-shooters", Description: "Shoot your way to the top on 14 different hoverboards"},
-	Product{Id: 2, Name: "Ocean Explorer", Slug: "ocean-explorer", Description: "Explore the depths of the sea in this one of a kind underwater experience"},
-	Product{Id: 3, Name: "Dinosaur Park", Slug: "dinosaur-park", Description: "Go back 65 million years in the past and ride a T-Rex"},
-	Product{Id: 4, Name: "Cars VR", Slug: "cars-vr", Description: "Get behind the wheel of the fastest cars in the world."},
-	Product{Id: 5, Name: "Robin Hood", Slug: "robin-hood", Description: "Pick up the bow and arrow and master the art of archery"},
-	Product{Id: 6, Name: "Real World VR", Slug: "real-world-vr", Description: "Explore the seven wonders of the world in VR"},
+var products = []m.Product{
+	m.Product{Id: 1, Name: "Hover Shooters", Slug: "hover-shooters", Description: "Shoot your way to the top on 14 different hoverboards"},
+	m.Product{Id: 2, Name: "Ocean Explorer", Slug: "ocean-explorer", Description: "Explore the depths of the sea in this one of a kind underwater experience"},
+	m.Product{Id: 3, Name: "Dinosaur Park", Slug: "dinosaur-park", Description: "Go back 65 million years in the past and ride a T-Rex"},
+	m.Product{Id: 4, Name: "Cars VR", Slug: "cars-vr", Description: "Get behind the wheel of the fastest cars in the world."},
+	m.Product{Id: 5, Name: "Robin Hood", Slug: "robin-hood", Description: "Pick up the bow and arrow and master the art of archery"},
+	m.Product{Id: 6, Name: "Real World VR", Slug: "real-world-vr", Description: "Explore the seven wonders of the world in VR"},
 }
 
 /* The status handler will be invoked when the user calls the /status route
