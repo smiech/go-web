@@ -4,6 +4,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Http } from '@angular/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { DeviceService } from '../../services/device.service';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -14,8 +15,9 @@ import { environment } from '../../../environments/environment';
 export class HomeComponent implements OnInit {
 
   constructor(private route: ActivatedRoute,
-    private presistenceService: PersistenceService,
+    private persistenceService: PersistenceService,
     private authService: AuthService,
+    private deviceService: DeviceService,
     private http: Http,
     private router: Router) {
   }
@@ -24,6 +26,22 @@ export class HomeComponent implements OnInit {
     if (!this.authService.checkLogin()) {
       this.router.navigate([environment.urls.login]);
     }
+
+    this.getDevices();
+   
     var authHeaders = this.authService.initAuthHeaders();
   }
+  private getDevices(): void {
+    this.deviceService
+        .getDevices(this.persistenceService.currentUser.id)
+        .then(x => {
+            // this.currentMeasure = x;
+            // this.currentMeasure.description = this.currentMeasure.description.replace(new RegExp('\r?\n', 'g'), '<br />');
+
+            // this.processMeasure();                
+        })
+        .catch(err => {
+            console.log(err);
+        }); 
+}
 }

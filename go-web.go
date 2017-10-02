@@ -21,10 +21,6 @@ const username string = "adam"
 const password string = "enter"
 const wwwRoot = "./client/dist/"
 
-// var domain = "localhost"
-// var httpPort = "8080"
-// var httpsPort = "8443"
-
 var port string = "8080"
 
 var store = sessions.NewCookieStore([]byte("dwadziescia-muharadzinow-bije-trzech-rabinow"))
@@ -80,10 +76,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	//de := Device{Id: "aa", Name: "bb"}
-	//de.save()
 	r.Handle("/api/v1/login", loginHandler).Methods("POST", "OPTIONS")
-	//r.Handle("/api/v1/login", optionHandler).Methods("OPTIONS")
 	r.Handle("/api/v1/status", authMiddleware(ProductsHandler)).Methods("GET")
 
 	r.HandleFunc("/", indexHandler)
@@ -151,7 +144,6 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	expireToken := time.Now().Add(time.Hour * 1).Unix()
-	//expireCookie := time.Now().Add(time.Hour * 1)
 
 	/* Create a map to store our claims*/
 	claims := m.Claims{
@@ -163,10 +155,8 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	/* Sign the token with our secret */
 	tokenString, _ := token.SignedString(mySigningKey)
-	// Place the token in the client's cookie
-	//cookie := http.Cookie{Name: "Auth", Value: tokenString, Expires: expireCookie, HttpOnly: false}
+
 	resp := m.AuthRequestResult{
 		State: 1,
 		Data:  m.DataStruct{AccessToken: tokenString, User: m.User{Name: "Adam"}},
