@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	m "github.com/adam72m/go-web/models"
+	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/gorilla/sessions"
 )
 
-/* Set up a global string for our secret */
-var mySigningKey = []byte("secret")
+var store = sessions.NewCookieStore([]byte("dwadziescia-muharadzinow-bije-trzech-rabinow"))
 
-func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+func SessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		session, err := store.Get(r, "session-name")
 		if err != nil {
@@ -25,4 +28,37 @@ func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.Ha
 
 		fn(w, r)
 	}
+}
+
+func Middleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// If no Auth cookie is set then return a 404 not found
+		cookie, err := r.Cookie("Auth")
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		// Return a Token using the cookie
+		token, err := jwt.ParseWithClaims(cookie.Value, &m.Claims{}, func(token *jwt.Token) (interface{}, error) {
+			// Make sure token's signature wasn't changed
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected siging method")
+			}
+			return []byte("secret"), nil
+		})
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+
+		if err != nil {
+			fmt.Println(err)
+			fmt.Println("Token is not valid:", token)
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Unauthorized"))
+		} else {
+			next.ServeHTTP(w, r)
+		}
+	})
 }

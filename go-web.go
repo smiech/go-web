@@ -4,19 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	"github.com/adam72m/go-web/auth"
 	deviceHandlers "github.com/adam72m/go-web/handlers/device"
 	m "github.com/adam72m/go-web/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/sessions"
 )
 
 const username string = "adam"
@@ -24,8 +23,6 @@ const password string = "enter"
 const wwwRoot = "./client/dist/"
 
 var port string = "8080"
-
-var store = sessions.NewCookieStore([]byte("dwadziescia-muharadzinow-bije-trzech-rabinow"))
 
 func configureLogger() io.Writer {
 	f, err := os.OpenFile("log.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
@@ -58,7 +55,7 @@ func main() {
 	r := mux.NewRouter()
 	r.Handle("/api/v1/login", loginHandler).Methods("POST", "OPTIONS")
 	r.Handle("/api/v1/submit", deviceHandlers.DataHandler).Methods("POST", "OPTIONS")
-	r.Handle("/api/v1/devices", authMiddleware(deviceHandlers.GetDevicesHandler)).Methods("GET")
+	r.Handle("/api/v1/devices", auth.Middleware(deviceHandlers.GetDevicesHandler)).Methods("GET")
 
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/").HandlerFunc(staticHandler)
@@ -109,6 +106,9 @@ func GetCredentials(reqBody io.ReadCloser) m.Credentials {
 	return t
 }
 
+/* Set up a global string for our secret */
+var mySigningKey = []byte("secret")
+
 /* Handlers */
 var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	/* Create the token */
@@ -146,57 +146,3 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(payload))
 })
-
-var dataHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	/* Create the token */
-	log.Printf("data handler invoked")
-	err := r.ParseForm()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	log.Println("r.PostForm", r.PostForm)
-	log.Println("r.Form", r.Form)
-
-	body, err := ioutil.ReadAll(r.Body)
-	log.Printf("Body: %v", body)
-	if err != nil {
-		log.Printf("Error parsing data %v ", err)
-	}
-	var jsonMap map[string]interface{}
-	json.Unmarshal(body, &jsonMap)
-	log.Printf("%v", jsonMap)
-})
-
-func authMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// If no Auth cookie is set then return a 404 not found
-		cookie, err := r.Cookie("Auth")
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-
-		// Return a Token using the cookie
-		token, err := jwt.ParseWithClaims(cookie.Value, &m.Claims{}, func(token *jwt.Token) (interface{}, error) {
-			// Make sure token's signature wasn't changed
-			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("Unexpected siging method")
-			}
-			return []byte("secret"), nil
-		})
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-
-		if err != nil {
-			fmt.Println(err)
-			fmt.Println("Token is not valid:", token)
-			w.WriteHeader(http.StatusUnauthorized)
-			w.Write([]byte("Unauthorized"))
-		} else {
-			next.ServeHTTP(w, r)
-		}
-	})
-}
