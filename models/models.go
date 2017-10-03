@@ -4,13 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
 type Device struct {
-	Id   string
-	Name string
+	Id       string
+	Name     string
+	LastSeen time.Time
 }
 
 type User struct {
