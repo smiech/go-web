@@ -47,13 +47,6 @@ type AuthRequestResult struct {
 	Data  DataStruct
 }
 
-type Product struct {
-	Id          int
-	Name        string
-	Slug        string
-	Description string
-}
-
 func (p *Device) save() error {
 	res1B, _ := json.Marshal(p)
 	fmt.Println(string(res1B))

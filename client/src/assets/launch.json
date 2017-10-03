@@ -1,0 +1,46 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Launch go-web tests",
+            "type": "go",
+            "request": "launch",
+            "mode": "test",
+            "remotePath": "",
+            "program": "${workspaceRoot}/src/github.com/adam72m/go-web",
+            "env": {},
+           
+            "showLog": true
+        },
+        {
+            "name": "go-web",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceRoot}/src/github.com/adam72m/go-web",
+            "env": {"port":8083,"debug": true}
+        },
+        {
+            "name": "go-test2",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceRoot}/src/github.com/adam72m/go-test2",
+            "env": {}
+        },
+        {
+            "name": "Launch",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "",
+            "port": 2345,
+            "host": "127.0.0.1",
+            "program": "${workspaceRoot}/src/github.com/DieterReuter/go-webservice",
+            "env": {},
+            "args": [],
+            "showLog": true
+        }
+    ]
+}

@@ -37,8 +37,6 @@ export class HomeComponent implements OnInit {
         .then(x => {
             // this.currentMeasure = x;
             // this.currentMeasure.description = this.currentMeasure.description.replace(new RegExp('\r?\n', 'g'), '<br />');
-
-            // this.processMeasure();                
         })
         .catch(err => {
             console.log(err);

@@ -4,12 +4,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"time"
 
+	deviceHandlers "github.com/adam72m/go-web/handlers/device"
 	m "github.com/adam72m/go-web/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
@@ -35,28 +37,6 @@ func configureLogger() io.Writer {
 	return f
 }
 
-func sessionCheckingHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		session, err := store.Get(r, "session-name")
-		if err != nil {
-			http.Error(w, fmt.Sprintf("The session expired \n"), http.StatusInternalServerError)
-			return
-		}
-		userName := session.Values["user"]
-		log.Printf("%v", userName)
-		if userName != "adam" {
-			http.Error(w, fmt.Sprintf("Invalid login \n"), http.StatusInternalServerError)
-			return
-		}
-
-		fn(w, r)
-	}
-}
-
-func tokenAuth(w http.ResponseWriter, r *http.Request) {
-	log.Printf("accessed \n")
-}
-
 func main() {
 	env := os.Args
 	var fileWriter io.Writer
@@ -77,7 +57,8 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Handle("/api/v1/login", loginHandler).Methods("POST", "OPTIONS")
-	r.Handle("/api/v1/status", authMiddleware(ProductsHandler)).Methods("GET")
+	r.Handle("/api/v1/submit", deviceHandlers.DataHandler).Methods("POST", "OPTIONS")
+	r.Handle("/api/v1/devices", authMiddleware(deviceHandlers.GetDevicesHandler)).Methods("GET")
 
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/").HandlerFunc(staticHandler)
@@ -116,9 +97,6 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	http.ServeFile(w, r, wwwRoot+"index.html")
 }
-
-/* Set up a global string for our secret */
-var mySigningKey = []byte("secret")
 
 func GetCredentials(reqBody io.ReadCloser) m.Credentials {
 	decoder := json.NewDecoder(reqBody)
@@ -169,6 +147,27 @@ var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request)
 	w.Write([]byte(payload))
 })
 
+var dataHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	/* Create the token */
+	log.Printf("data handler invoked")
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Println("r.PostForm", r.PostForm)
+	log.Println("r.Form", r.Form)
+
+	body, err := ioutil.ReadAll(r.Body)
+	log.Printf("Body: %v", body)
+	if err != nil {
+		log.Printf("Error parsing data %v ", err)
+	}
+	var jsonMap map[string]interface{}
+	json.Unmarshal(body, &jsonMap)
+	log.Printf("%v", jsonMap)
+})
+
 func authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// If no Auth cookie is set then return a 404 not found
@@ -201,29 +200,3 @@ func authMiddleware(next http.Handler) http.Handler {
 		}
 	})
 }
-
-/* We will create our catalog of VR experiences and store them in a slice. */
-var products = []m.Product{
-	m.Product{Id: 1, Name: "Hover Shooters", Slug: "hover-shooters", Description: "Shoot your way to the top on 14 different hoverboards"},
-	m.Product{Id: 2, Name: "Ocean Explorer", Slug: "ocean-explorer", Description: "Explore the depths of the sea in this one of a kind underwater experience"},
-	m.Product{Id: 3, Name: "Dinosaur Park", Slug: "dinosaur-park", Description: "Go back 65 million years in the past and ride a T-Rex"},
-	m.Product{Id: 4, Name: "Cars VR", Slug: "cars-vr", Description: "Get behind the wheel of the fastest cars in the world."},
-	m.Product{Id: 5, Name: "Robin Hood", Slug: "robin-hood", Description: "Pick up the bow and arrow and master the art of archery"},
-	m.Product{Id: 6, Name: "Real World VR", Slug: "real-world-vr", Description: "Explore the seven wonders of the world in VR"},
-}
-
-/* The status handler will be invoked when the user calls the /status route
-It will simply return a string with the message "API is up and running" */
-var StatusHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("API is up and running"))
-})
-
-/* The products handler will be called when the user makes a GET request to the /products endpoint.
-This handler will return a list of products available for users to review */
-var ProductsHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// Here we are converting the slice of products to json
-	payload, _ := json.Marshal(products)
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(payload))
-})
