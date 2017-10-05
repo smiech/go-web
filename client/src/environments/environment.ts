@@ -11,6 +11,7 @@ export const environment = {
   urls: {
     login: "login",
     home: "home",
-    userspace:"userspace"
+    userspace:"userspace",
+    styleguide:"styleguide"
   }
 };

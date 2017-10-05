@@ -7,8 +7,8 @@ import { Menuitem } from '../../models/menuitem-models';
 })
 export class NavMenuComponent {
     public extraMenuItems: Array<Menuitem> = [{
-        name:'extra',
-        link:'extra'
+        name:'styleguide',
+        link:'/styleguide'
     }];
     updateMenuItems(value) {
         this.extraMenuItems = value;

@@ -1,0 +1,64 @@
+@import '../../../assets/scss/variables';
+
+.lg-button {
+    display: inline-block;
+    border: 0 none;
+    border-radius: 35px;
+    padding: 1rem 2rem;
+    font-size: 1rem;
+    font-weight: 500;
+    // letter-spacing: rem(1);
+    line-height: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    outline: none;
+    background-color: $color-fallback;
+    &:hover {
+        cursor: pointer;
+        text-decoration: none;
+    }
+    &:active {
+        box-shadow: 2px 1px 3px 0px rgba(0, 0, 0, 0.30) inset;
+    }
+    &.is_disabled, &:disabled {
+        background-color: lightgrey !important;
+        color: grey !important;
+        font-weight: normal !important;
+        &:hover {
+            cursor: not-allowed;
+            background-color: lightgrey !important;
+            color: grey !important;
+        }
+        &:active {
+            box-shadow: none !important;
+        }
+        .fa-spin {
+            color: grey !important;
+            font-size: inherit;
+        }
+    }
+    + .lg-button {
+        margin-left: 1rem;
+    }
+}
+
+.lg-button--primary {
+    color: white;
+    background-color: $color-primary;
+    &:hover, &.hover {
+        background-color: $color-primary-hover;
+    }
+    &:active, &.active {
+        background-color: $color-primary-hover;
+    }
+    &.is_inverted {
+        color: $color-primary;
+        background-color: white;
+        &:hover, &.hover {
+            color: $color-primary-hover;
+        }
+        &:active, &.active {
+            color: $color-primary-hover;
+        }
+    }
+}
