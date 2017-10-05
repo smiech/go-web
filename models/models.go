@@ -1,20 +1,41 @@
 package models
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
+	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+type CallbackData struct {
+	Device string
+	Data   string
+	Time   int64
+}
+
+type DeviceEvent struct {
+	Id         int
+	DeviceId   int
+	Name       string
+	CreateTime time.Time
+}
+
+type DeviceCommand struct {
+	Id           int
+	DeviceId     int
+	Command      string
+	CreateTime   time.Time
+	ExecutedTime time.Time
+}
+
 type Device struct {
-	Id   string
-	Name string
+	Guid     string
+	Id       int
+	Name     string
+	LastSeen time.Time
 }
 
 type User struct {
-	Guid           string
+	Id             int
 	Name           string
 	Email          string
 	ServiceCookies map[string]string
@@ -45,29 +66,4 @@ type AuthRequestResult struct {
 	State int
 	Msg   string
 	Data  DataStruct
-}
-
-type Product struct {
-	Id          int
-	Name        string
-	Slug        string
-	Description string
-}
-
-func (p *Device) save() error {
-	res1B, _ := json.Marshal(p)
-	fmt.Println(string(res1B))
-	filename := "devices.json"
-	return ioutil.WriteFile(filename, res1B, 0600)
-}
-
-func load(title string) (*Device, error) {
-	filename := "devices.json"
-	device := Device{}
-	body, err := ioutil.ReadFile(filename)
-	json.Unmarshal(body, &device)
-	if err != nil {
-		return nil, err
-	}
-	return &Device{Id: device.Id, Name: device.Name}, nil
 }
