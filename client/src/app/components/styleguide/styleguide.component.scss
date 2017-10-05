@@ -9,6 +9,13 @@
     color: white;
 }
 
+.lg-overlay--white {
+    margin: -1rem;
+    padding: 1rem;
+    color: #8e8e93;
+    background-color: white;
+}
+
 .lg-app-logo {
     text-align: center;
     figcaption {
@@ -17,6 +24,22 @@
         line-height: 1.25em;
         color: white;
     }
+}
+
+.lg-tab-bar {
+    display: table;
+    width: 100%;
+    .lg-tab-bar__item {
+        display: table-cell;
+        text-align: center;
+        &.is_active {
+            color: #0fcbfb;
+        }
+    }
+    -webkit-user-select: none;  
+    -moz-user-select: none;    
+    -ms-user-select: none;      
+    user-select: none;
 }
 
 // Forms

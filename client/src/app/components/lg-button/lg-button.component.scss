@@ -13,6 +13,10 @@
     text-decoration: none;
     outline: none;
     background-color: $color-fallback;
+    -webkit-user-select: none;  
+    -moz-user-select: none;    
+    -ms-user-select: none;      
+    user-select: none;
     &:hover {
         cursor: pointer;
         text-decoration: none;
