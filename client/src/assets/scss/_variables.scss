@@ -1,0 +1,26 @@
+// @import "bourbon/bourbon";
+
+@function tint($color, $percent) {
+    @return mix(#fff, $color, $percent);
+}
+
+@function shade($color, $percent) {
+    @return mix(#000, $color, $percent);
+}
+
+// Fonts
+$font-family-body: 'Avenir', 'Lato', sans-serif;
+$font-family-headings: 'Avenir', 'Lato', sans-serif;
+$font-family-logo: 'Gotham Rounded', 'Nunito', sans-serif;
+
+// Colors
+$color-fallback: red;
+
+$color-primary: #0fcbfb;
+$color-primary-hover: #217fbc;
+
+$color-secondary: #0fcbfb;
+$color-secondary-hover: shade($color-primary, 10%);
+
+// Gradients
+$gradient-background: linear-gradient(-256deg, #217FBC 1%, #44C8E8 100%);
