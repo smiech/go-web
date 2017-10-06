@@ -25,6 +25,7 @@ type PersistenceStorage interface {
 	RegisterDeviceEvent(deviceId int, event models.DeviceEvent) error
 	RegisterDeviceCommand(deviceId int, command models.DeviceCommand) error
 	GetDeviceCommands(deviceId int) ([]models.DeviceCommand, error)
+	GetDeviceByGuid(deviceId string) (models.Device, error)
 }
 
 func first(vs []models.Device, f func(models.Device) bool) models.Device {
@@ -49,14 +50,22 @@ type StorageImplementation struct {
 	DB *scribble.Driver
 }
 
-func (s StorageImplementation) StoreHeartBeat(deviceID string, timestamp time.Time) error {
+func (s StorageImplementation) GetDeviceByGuid(deviceId string) (models.Device, error) {
 	devs, err := s.GetDevices(0)
+	if err != nil {
+		return models.Device{}, StorageError{Message: "No Devices found"}
+	}
+	theDevice := first(devs, func(m models.Device) bool {
+		return m.Guid == deviceId
+	})
+	return theDevice, nil
+}
+
+func (s StorageImplementation) StoreHeartBeat(deviceID string, timestamp time.Time) error {
+	theDevice, err := s.GetDeviceByGuid(deviceID)
 	if err != nil {
 		return StorageError{Message: "No Devices found"}
 	}
-	theDevice := first(devs, func(m models.Device) bool {
-		return m.Guid == deviceID
-	})
 	theDevice.LastSeen = time.Now()
 	s.DB.Write("device", fmt.Sprintf("%v", theDevice.Id), theDevice)
 	log.Printf("%v", theDevice)
@@ -120,13 +129,10 @@ func (s StorageImplementation) AddUser(user models.User) error {
 }
 
 func (s StorageImplementation) RegisterDeviceEvent(deviceId int, event models.DeviceEvent) error {
-	currentDeviceEvents, err := s.DB.ReadAll(deviceEventTable)
-	if err != nil {
-		return StorageError{Message: "Failed registering event"}
-	}
-	newId := len(currentDeviceEvents)
+	currentDeviceEvents, _ := s.DB.ReadAll(deviceEventTable)
+	newId := len(currentDeviceEvents) + 1
 	event.Id = newId
-	err = s.DB.Write(deviceEventTable, fmt.Sprintf("%v", event.Id), event)
+	err := s.DB.Write(deviceEventTable, fmt.Sprintf("%v", event.Id), event)
 	if err != nil {
 		return StorageError{Message: "Failed registering event"}
 	}
@@ -135,13 +141,11 @@ func (s StorageImplementation) RegisterDeviceEvent(deviceId int, event models.De
 }
 
 func (s StorageImplementation) RegisterDeviceCommand(deviceId int, command models.DeviceCommand) error {
-	currentDeviceCommands, err := s.DB.ReadAll(deviceCommandTable)
-	if err != nil {
-		return StorageError{Message: "Failed registering command"}
-	}
-	newId := len(currentDeviceCommands)
+	currentDeviceCommands, _ := s.DB.ReadAll(deviceCommandTable)
+
+	newId := len(currentDeviceCommands) + 1
 	command.Id = newId
-	err = s.DB.Write(deviceCommandTable, fmt.Sprintf("%v", command.Id), command)
+	err := s.DB.Write(deviceCommandTable, fmt.Sprintf("%v", command.Id), command)
 	if err != nil {
 		return StorageError{Message: "Failed registering command"}
 	}

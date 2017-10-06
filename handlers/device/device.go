@@ -21,7 +21,7 @@ const alertMarker string = "alarm"
 const stopRequestMarker string = "stop"
 
 const stopCommand string = "FF000000000000"
-const idleCommand string = "000000000000FF"
+const startCommand string = "000000000000FF"
 
 var DeviceCallHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
@@ -40,6 +40,7 @@ var DeviceCallHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Req
 		handleHeartBeat(jsonMap.Device, jsonMap.Time)
 	case alertMarker:
 		log.Printf("Alert from device: %v", jsonMap.Device)
+		handleAlertRequest(jsonMap.Device)
 	case stopRequestMarker:
 		log.Printf("Stop request from device: %v", jsonMap.Device)
 		handleStopRequest(jsonMap.Device, w)
@@ -48,18 +49,48 @@ var DeviceCallHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Req
 	}
 })
 
-func handleStopRequest(deviceId string, w http.ResponseWriter) {
+func handleAlertRequest(deviceId string) {
+	device, _ := Storage.GetDeviceByGuid(deviceId)
+	Storage.RegisterDeviceEvent(device.Id, models.DeviceEvent{Name: "alert", CreateTime: time.Now(), DeviceId: device.Id})
+}
 
-	payload := `{
-		"` + fmt.Sprintf("%v", deviceId) + `" : { "downlinkData" : "` + stopCommand + `" }
-	}`
-	log.Printf("return payload: %v", payload)
-	w.Header().Set("content-type", "application/json")
-	w.Write([]byte(payload))
+func handleStopRequest(deviceId string, w http.ResponseWriter) {
+	device, _ := Storage.GetDeviceByGuid(deviceId)
+	Storage.RegisterDeviceEvent(device.Id, models.DeviceEvent{Name: stopRequestMarker, CreateTime: time.Now(), DeviceId: device.Id})
+
+	deviceCommands, _ := Storage.GetDeviceCommands(device.Id)
+	var command models.DeviceCommand
+	timeRef := time.Time{}
+	for _, v := range deviceCommands {
+		if v.ExecutedTime == timeRef {
+			command = v
+			break
+
+		}
+	}
+	if command != (models.DeviceCommand{}) {
+		var commandToSend string
+		if command.Command == "stop" {
+			log.Printf("Sending downlink command to stop for device: %v Command: %v", deviceId, commandToSend)
+			commandToSend = stopCommand
+		} else {
+			log.Printf("Sending downlink command to start for device: %v Command: %v", deviceId, commandToSend)
+			commandToSend = startCommand
+		}
+		payload := `{
+			"` + fmt.Sprintf("%v", deviceId) + `" : { "downlinkData" : "` + commandToSend + `" }
+		}`
+		log.Printf("return payload: %v", payload)
+		w.Header().Set("content-type", "application/json")
+		w.Write([]byte(payload))
+	} else {
+		log.Printf("No command to execute for device %v", deviceId)
+	}
 }
 
 func handleHeartBeat(deviceId string, timeEpoch int64) {
-	devices, _ := Storage.GetDevices(0)
+	devices, err := Storage.GetDevices(0)
+	log.Printf("%v", err)
 	timeStamp := time.Unix(timeEpoch, 0)
 	if len(devices) == 0 {
 		Storage.AddDevice(models.Device{Id: 1, Guid: deviceId, Name: "Adam test 1", LastSeen: time.Unix(timeEpoch, 0)})
@@ -76,9 +107,9 @@ var StatusHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request
 	isDeviceAlive, _ := Storage.GetDeviceAlive(deviceId)
 	var response string
 	if isDeviceAlive {
-		response = fmt.Sprintf("ALIVE.", deviceId)
+		response = fmt.Sprint("ALIVE")
 	} else {
-		response = fmt.Sprintf("NOTALIVE.", deviceId)
+		response = fmt.Sprint("NOTALIVE")
 	}
 	w.Write([]byte(response))
 })

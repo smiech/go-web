@@ -12,6 +12,7 @@ import (
 
 	"github.com/adam72m/go-web/auth"
 	persistence "github.com/adam72m/go-web/data"
+	adminHandlers "github.com/adam72m/go-web/handlers/admin"
 	deviceHandlers "github.com/adam72m/go-web/handlers/device"
 	m "github.com/adam72m/go-web/models"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -43,6 +44,7 @@ func main() {
 		log.Println("Error", err)
 	}
 	deviceHandlers.Storage = persistence.StorageImplementation{DB: db}
+	adminHandlers.Storage = persistence.StorageImplementation{DB: db}
 
 	env := os.Args
 	var fileWriter io.Writer
@@ -64,8 +66,8 @@ func main() {
 	r := mux.NewRouter()
 	r.Handle("/api/v1/login", loginHandler).Methods("POST", "OPTIONS")
 	r.Handle("/api/v1/submit", deviceHandlers.DeviceCallHandler).Methods("POST", "OPTIONS")
-	r.Handle("/api/v1/devices/status/{deviceId}", deviceHandlers.StatusHandler).Methods("GET")
 	r.Handle("/api/v1/devices", auth.Middleware(deviceHandlers.GetDevicesHandler)).Methods("GET")
+	r.Handle("/api/v1/devices/status/{deviceId}", deviceHandlers.StatusHandler).Methods("GET")
 
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/").HandlerFunc(staticHandler)
