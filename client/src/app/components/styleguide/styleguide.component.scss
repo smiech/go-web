@@ -30,11 +30,19 @@
     display: table;
     width: 100%;
     .lg-tab-bar__item {
+        padding: .5rem;
         display: table-cell;
         text-align: center;
         &.is_active {
             color: #0fcbfb;
         }
+        &:active, &.is_pressed {
+            background-color: $color-primary-hover; 
+            color: white;
+        }
+        transition:0.3s ease all; 
+        -moz-transition:0.3s ease all; 
+        -webkit-transition:0.3s ease all;
     }
     -webkit-user-select: none;  
     -moz-user-select: none;    
