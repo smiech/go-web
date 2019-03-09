@@ -6,6 +6,12 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+type ExecuteData struct {
+	CommandId string
+	Data      string
+	Time      int64
+}
+
 type CallbackData struct {
 	Device string
 	Data   string
