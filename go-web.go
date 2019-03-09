@@ -10,11 +10,11 @@ import (
 	"strings"
 	"time"
 
-	m "github.com/adam72m/go-web/models"
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	executeHandlers "github.com/smiech/go-web/handlers/executors"
+	m "github.com/smiech/go-web/models"
 )
 
 const username string = "adam"
@@ -43,6 +43,7 @@ func main() {
 	} else {
 		fileWriter = configureLogger()
 	}
+	executeHandlers.ExecuteCommand("./scripts/echo.sh")
 	port = os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {
 		port = os.Getenv("port")

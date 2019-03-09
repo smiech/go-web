@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/fsnotify/fsnotify"
 	models "github.com/smiech/go-web/models"
 )
 
@@ -34,6 +35,16 @@ var ExecuteHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 
 func handleStart(data string, w http.ResponseWriter) {
 	log.Printf("Handling start command with data: %v", data)
+
+	payload := `{
+		"` + fmt.Sprintf("%v", data) + `"
+	}`
+	log.Printf("return payload: %v", payload)
+	w.Header().Set("content-type", "application/json")
+	w.Write([]byte(payload))
+}
+
+func ExecuteCommand(path string) {
 	cmd := exec.Command("./scripts/echo.sh")
 
 	// setup log file
@@ -48,14 +59,55 @@ func handleStart(data string, w http.ResponseWriter) {
 	if err != nil {
 		log.Printf("Error!! : %v", err)
 	}
-	payload := `{
-		"` + fmt.Sprintf("%v", data) + `"
-	}`
-	log.Printf("return payload: %v", payload)
-	w.Header().Set("content-type", "application/json")
-	w.Write([]byte(payload))
+
+	go newWatcher("dumps")
 }
 
+func newWatcher(path string) {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer watcher.Close()
+
+	done := make(chan bool)
+	go func() {
+		for {
+			select {
+			case event, ok := <-watcher.Events:
+				if !ok {
+					return
+				}
+				log.Println("event:", event)
+				if event.Op&fsnotify.Write == fsnotify.Write {
+					log.Println("modified file:", event.Name)
+					b, err := ioutil.ReadFile(event.Name) // just pass the file name
+					if err != nil {
+						fmt.Print(err)
+					}
+
+					//fmt.Println(b) // print the content as 'bytes'
+
+					str := string(b) // convert content to a 'string'
+
+					log.Println(str) // print the content as a 'string'
+
+				}
+			case err, ok := <-watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}()
+
+	err = watcher.Add(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	<-done
+}
 func handleStop(data string, w http.ResponseWriter) {
 	log.Printf("Handling stop command with data: %v", data)
 	payload := `{

@@ -1,0 +1,13 @@
+
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+78:4F:43:51:81:DB, 2019-03-09 22:16:54, 2019-03-09 22:16:54, -18,        1, 5C:49:79:5C:9B:5B,
+
+22:16:52, 2019-03-09 22:16:54, 11, 195, WPA2, CCMP, PSK, -45,        6,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+5C:49:79:5C:9B:5B, 2019-03-09 22:16:53, 2019-03-09 22:16:54, 36, 1170, WPA2, CCMP, PSK, -43,        3,        1,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+5C:49:79:5C:9B:5A, 2019-03-09 22:16:52, 2019-03-09 22:16:53, 11, 195, WPA2, CCMP, PSK, -37,        1,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+78:4F:43:51:81:DB, 2019-03-09 22:16:54, 2019-03-09 22:16:54, -18,        1, 5C:49:79:5C:9B:5B,
+

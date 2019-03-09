@@ -1,0 +1,84 @@
+2019/03/09 21:53:45 Logging configured
+2019/03/09 21:53:47 Execute command: start Data: test me
+2019/03/09 21:53:47 Handling start command with data: test me
+2019/03/09 21:53:47 return payload: {
+		"test me"
+	}
+192.168.188.29 - - [09/Mar/2019:21:53:47 +0100] "POST /api/v1/execute HTTP/1.1" 200 16
+2019/03/09 21:53:47 event: "dumps/dump-01.csv": REMOVE
+2019/03/09 21:53:47 event: "dumps/dump-01.csv": CREATE
+2019/03/09 21:54:02 event: "dumps/dump-01.csv": WRITE
+2019/03/09 21:54:02 modified file: dumps/dump-01.csv
+2019/03/09 21:54:17 event: "dumps/dump-01.csv": WRITE
+2019/03/09 21:54:17 modified file: dumps/dump-01.csv
+2019/03/09 22:06:36 Logging configured
+2019/03/09 22:08:10 Logging configured
+2019/03/09 22:08:51 Logging configured
+2019/03/09 22:11:18 Logging configured
+2019/03/09 22:11:18 event: "dumps/dump-01.csv": REMOVE
+2019/03/09 22:11:18 event: "dumps/dump-01.csv": CREATE
+2019/03/09 22:11:33 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:11:33 modified file: dumps/dump-01.csv
+2019/03/09 22:11:43 Execute command: start Data: test me
+2019/03/09 22:11:43 Handling start command with data: test me
+2019/03/09 22:11:43 return payload: {
+		"test me"
+	}
+192.168.188.29 - - [09/Mar/2019:22:11:43 +0100] "POST /api/v1/execute HTTP/1.1" 200 16
+2019/03/09 22:11:48 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:11:48 modified file: dumps/dump-01.csv
+2019/03/09 22:12:03 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:12:03 modified file: dumps/dump-01.csv
+2019/03/09 22:15:57 Logging configured
+2019/03/09 22:15:57 event: "dumps/dump-01.csv": REMOVE
+2019/03/09 22:15:57 event: "dumps/dump-01.csv": CREATE
+2019/03/09 22:16:12 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:16:12 modified file: dumps/dump-01.csv
+2019/03/09 22:16:12 
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+
+
+2019/03/09 22:16:27 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:16:27 modified file: dumps/dump-01.csv
+2019/03/09 22:16:27 
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+
+
+2019/03/09 22:16:42 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:16:42 modified file: dumps/dump-01.csv
+2019/03/09 22:16:42 
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+
+
+2019/03/09 22:16:57 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:16:57 modified file: dumps/dump-01.csv
+2019/03/09 22:16:57 
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+E8:DF:70:A1:0E:8D, 2019-03-09 22:16:52, 2019-03-09 22:16:54, 11, 195, WPA2, CCMP, PSK, -45,        6,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+5C:49:79:5C:9B:5A, 2019-03-09 22:16:52, 2019-03-09 22:16:53, 11, 195, WPA2, CCMP, PSK, -37,        1,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+5C:49:79:5C:9B:5B, 2019-03-09 22:16:53, 2019-03-09 22:16:54, 36, 1170, WPA2, CCMP, PSK, -43,        3,        1,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+E8:DF:70:A1:0E:8C, 2019-03-09 22:16:53, 2019-03-09 22:16:54, 36, 1170, WPA2, CCMP, PSK, -62,        1,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+78:4F:43:51:81:DB, 2019-03-09 22:16:54, 2019-03-09 22:16:54, -18,        1, 5C:49:79:5C:9B:5B,
+
+
+2019/03/09 22:17:12 event: "dumps/dump-01.csv": WRITE
+2019/03/09 22:17:12 modified file: dumps/dump-01.csv
+2019/03/09 22:17:12 
+BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key
+E8:DF:70:A1:0E:8C, 2019-03-09 22:16:53, 2019-03-09 22:16:54, 36, 1170, WPA2, CCMP, PSK, -62,        1,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+E8:DF:70:A1:0E:8D, 2019-03-09 22:16:52, 2019-03-09 22:16:54, 11, 195, WPA2, CCMP, PSK, -45,        6,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+5C:49:79:5C:9B:5B, 2019-03-09 22:16:53, 2019-03-09 22:16:54, 36, 1170, WPA2, CCMP, PSK, -43,        3,        1,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+5C:49:79:5C:9B:5A, 2019-03-09 22:16:52, 2019-03-09 22:16:53, 11, 195, WPA2, CCMP, PSK, -37,        1,        0,   0.  0.  0.  0,  17, FRITZ!Box 7581 MY, 
+
+Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs
+78:4F:43:51:81:DB, 2019-03-09 22:16:54, 2019-03-09 22:16:54, -18,        1, 5C:49:79:5C:9B:5B,
+
+
