@@ -44,7 +44,7 @@ func handleStart(data string, w http.ResponseWriter) {
 	w.Write([]byte(payload))
 }
 
-func ExecuteCommand(path string) {
+func ExecuteCommand(path string, output chan<- string, quit <-chan bool) {
 	cmd := exec.Command("./scripts/echo.sh")
 
 	// setup log file
@@ -56,14 +56,22 @@ func ExecuteCommand(path string) {
 	cmd.Stdout = file
 
 	err = cmd.Start()
+	go func() {
+		select {
+		case <-quit:
+			log.Println("Killing process")
+			cmd.Process.Kill()
+		}
+	}()
+
 	if err != nil {
 		log.Printf("Error!! : %v", err)
 	}
 
-	go newWatcher("dumps")
+	go newWatcher("./dumps", output, quit)
 }
 
-func newWatcher(path string) {
+func newWatcher(path string, output chan<- string, quit <-chan bool) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
@@ -74,6 +82,9 @@ func newWatcher(path string) {
 	go func() {
 		for {
 			select {
+			case <-quit:
+				log.Println("Quiting filewatcher")
+				return
 			case event, ok := <-watcher.Events:
 				if !ok {
 					return
@@ -90,7 +101,7 @@ func newWatcher(path string) {
 
 					str := string(b) // convert content to a 'string'
 
-					log.Println(str) // print the content as a 'string'
+					output <- str // print the content as a 'string'
 
 				}
 			case err, ok := <-watcher.Errors:

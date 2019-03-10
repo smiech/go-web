@@ -34,7 +34,8 @@ func configureLogger() io.Writer {
 }
 
 func main() {
-
+	output := make(chan string)
+	quit := make(chan bool)
 	env := os.Args
 	var fileWriter io.Writer
 	envLength := len(env)
@@ -43,7 +44,19 @@ func main() {
 	} else {
 		fileWriter = configureLogger()
 	}
-	executeHandlers.ExecuteCommand("./scripts/echo.sh")
+	executeHandlers.ExecuteCommand("./scripts/echo.sh", output, quit)
+	go func() {
+		for {
+			select {
+			case file := <-output:
+				log.Println("File contents:")
+				log.Println("modified file:", file)
+			case <-time.After(50 * time.Second):
+				log.Println("Sending quit signal")
+				quit <- true
+			}
+		}
+	}()
 	port = os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {
 		port = os.Getenv("port")
