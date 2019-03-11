@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -10,11 +9,11 @@ import (
 	"strings"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	fileParser "github.com/smiech/go-web/helpers"
+
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	executeHandlers "github.com/smiech/go-web/handlers/executors"
-	m "github.com/smiech/go-web/models"
 )
 
 const username string = "adam"
@@ -36,6 +35,7 @@ func configureLogger() io.Writer {
 func main() {
 	output := make(chan string)
 	quit := make(chan bool)
+	quit2 := make(chan bool)
 	env := os.Args
 	var fileWriter io.Writer
 	envLength := len(env)
@@ -45,15 +45,22 @@ func main() {
 		fileWriter = configureLogger()
 	}
 	executeHandlers.ExecuteCommand("./scripts/echo.sh", output, quit)
+	go executeHandlers.NewWatcher("./dumps", output, quit2)
 	go func() {
 		for {
 			select {
 			case file := <-output:
 				log.Println("File contents:")
 				log.Println("modified file:", file)
+				records, err := fileParser.Parse(file)
+				if err != nil {
+					fmt.Printf("error opening file: %v", err)
+				}
+				log.Println(records)
 			case <-time.After(50 * time.Second):
 				log.Println("Sending quit signal")
 				quit <- true
+				quit2 <- true
 			}
 		}
 	}()
@@ -67,7 +74,6 @@ func main() {
 	}
 
 	r := mux.NewRouter()
-	r.Handle("/api/v1/login", loginHandler).Methods("POST", "OPTIONS")
 	r.Handle("/api/v1/execute", executeHandlers.ExecuteHandler).Methods("POST", "OPTIONS")
 
 	r.HandleFunc("/", indexHandler)
@@ -108,54 +114,5 @@ func staticHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, wwwRoot+"index.html")
 }
 
-func GetCredentials(reqBody io.ReadCloser) m.Credentials {
-	decoder := json.NewDecoder(reqBody)
-	var t m.Credentials
-	err := decoder.Decode(&t)
-	if err != nil {
-		panic(err)
-	}
-	defer reqBody.Close()
-	return t
-}
-
 /* Set up a global string for our secret */
 var mySigningKey = []byte("secret")
-
-/* Handlers */
-var loginHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	/* Create the token */
-	log.Printf("login handler invoked")
-
-	credentials := GetCredentials(r.Body)
-
-	if credentials.Username != username && credentials.Password != password {
-		w.WriteHeader(http.StatusForbidden)
-		log.Printf("Error in request")
-		return
-	}
-	expireToken := time.Now().Add(time.Hour * 1).Unix()
-
-	/* Create a map to store our claims*/
-	claims := m.Claims{
-		username,
-		jwt.StandardClaims{
-			ExpiresAt: expireToken,
-			Issuer:    "localhost:" + port,
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, _ := token.SignedString(mySigningKey)
-
-	resp := m.AuthRequestResult{
-		State: 1,
-		Data:  m.DataStruct{AccessToken: tokenString, User: m.User{Name: "Adam"}},
-	}
-	payload, err := json.Marshal(resp)
-	log.Printf("%v", err)
-	check := m.AuthRequestResult{}
-	json.Unmarshal(payload, &check)
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(payload))
-})

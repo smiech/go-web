@@ -67,11 +67,9 @@ func ExecuteCommand(path string, output chan<- string, quit <-chan bool) {
 	if err != nil {
 		log.Printf("Error!! : %v", err)
 	}
-
-	go newWatcher("./dumps", output, quit)
 }
 
-func newWatcher(path string, output chan<- string, quit <-chan bool) {
+func NewWatcher(path string, output chan<- string, quit <-chan bool) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		log.Fatal(err)
