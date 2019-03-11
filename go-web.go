@@ -11,7 +11,6 @@ import (
 
 	"github.com/smiech/go-web/globals"
 
-	"github.com/go-cmd/cmd"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	executeHandlers "github.com/smiech/go-web/handlers/executors"
@@ -36,7 +35,7 @@ func configureLogger() io.Writer {
 
 func main() {
 	output := make(chan string)
-	//quit := make(chan bool)
+	quit := make(chan bool)
 	quit2 := make(chan bool)
 	env := os.Args
 	var fileWriter io.Writer
@@ -46,10 +45,10 @@ func main() {
 	} else {
 		fileWriter = configureLogger()
 	}
-	//executeHandlers.ExecuteCommand("./scripts/echo.sh", output, quit)
+	executeHandlers.ExecuteCommand("./scripts/echo.sh", output, quit)
 	// Start a long-running process, capture stdout and stderr
-	findCmd := cmd.NewCmd("./scripts/echo.sh")
-	findCmd.Start() // non-blocking
+	//findCmd := cmd.NewCmd("./scripts/echo.sh")
+	///////findCmd.Start() // non-blocking
 
 	//ticker := time.NewTicker(2 * time.Second)
 

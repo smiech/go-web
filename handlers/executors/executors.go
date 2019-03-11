@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"os/exec"
 
 	"github.com/smiech/go-web/globals"
@@ -59,15 +58,9 @@ func handleStart(data string, w http.ResponseWriter) {
 func ExecuteCommand(path string, output chan<- string, quit <-chan bool) {
 	cmd := exec.Command("./scripts/echo.sh")
 
-	// setup log file
-	file, err := os.Create("server.log")
-	if err != nil {
-		log.Printf("Error!! : %v", err)
-	}
+	cmd.Stdout = nil
 
-	cmd.Stdout = file
-
-	err = cmd.Start()
+	err := cmd.Start()
 	go func() {
 		select {
 		case <-quit:
