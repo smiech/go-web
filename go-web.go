@@ -9,11 +9,13 @@ import (
 	"strings"
 	"time"
 
-	fileParser "github.com/smiech/go-web/helpers"
+	"github.com/smiech/go-web/globals"
 
+	"github.com/go-cmd/cmd"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	executeHandlers "github.com/smiech/go-web/handlers/executors"
+	fileParser "github.com/smiech/go-web/helpers"
 )
 
 const username string = "adam"
@@ -34,7 +36,7 @@ func configureLogger() io.Writer {
 
 func main() {
 	output := make(chan string)
-	quit := make(chan bool)
+	//quit := make(chan bool)
 	quit2 := make(chan bool)
 	env := os.Args
 	var fileWriter io.Writer
@@ -44,8 +46,33 @@ func main() {
 	} else {
 		fileWriter = configureLogger()
 	}
-	executeHandlers.ExecuteCommand("./scripts/echo.sh", output, quit)
+	//executeHandlers.ExecuteCommand("./scripts/echo.sh", output, quit)
+	// Start a long-running process, capture stdout and stderr
+	findCmd := cmd.NewCmd("./scripts/echo.sh")
+	findCmd.Start() // non-blocking
+
+	//ticker := time.NewTicker(2 * time.Second)
+
+	// Print last line of stdout every 2s
+	/* go func() {
+		for range ticker.C {
+			status := findCmd.Status()
+			n := len(status.Stdout)
+			fmt.Println(status.Stdout[n-1])
+		}
+	}() */
+
 	go executeHandlers.NewWatcher("./dumps", output, quit2)
+	// setup log file
+	/* fileReader, _ := os.Open("dumps/dump-01.csv")
+	file, _ := ioutil.ReadAll(fileReader)
+	records, err := fileParser.Parse(string(file))
+	if err != nil {
+		fmt.Printf("error opening file: %v", err)
+	}
+	log.Println(records)
+	globals.NetworkInfo = records */
+
 	go func() {
 		for {
 			select {
@@ -57,10 +84,12 @@ func main() {
 					fmt.Printf("error opening file: %v", err)
 				}
 				log.Println(records)
+				globals.NetworkInfo = records
 			case <-time.After(50 * time.Second):
 				log.Println("Sending quit signal")
-				quit <- true
-				quit2 <- true
+				//findCmd.Stop()
+				//quit <- true
+				//quit2 <- true
 			}
 		}
 	}()
@@ -75,7 +104,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Handle("/api/v1/execute", executeHandlers.ExecuteHandler).Methods("POST", "OPTIONS")
-
+	r.Handle("/api/v1/list", executeHandlers.List).Methods("GET", "OPTIONS")
 	r.HandleFunc("/", indexHandler)
 	r.PathPrefix("/").HandlerFunc(staticHandler)
 

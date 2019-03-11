@@ -9,9 +9,21 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/smiech/go-web/globals"
+
 	"github.com/fsnotify/fsnotify"
 	models "github.com/smiech/go-web/models"
 )
+
+var List = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	v := globals.NetworkInfo
+	payload, _ := json.Marshal(v)
+	log.Printf("List command called")
+	w.Header().Set("Content-Type", "application/json")
+	w.Write([]byte(payload))
+	//msgTime := time.Unix(jsonMap.Time, 0)
+
+})
 
 var ExecuteHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)

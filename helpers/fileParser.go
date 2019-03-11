@@ -11,11 +11,12 @@ import (
 const _APHeader = "BSSID, First time seen, Last time seen, channel, Speed, Privacy, Cipher, Authentication, Power, # beacons, # IV, LAN IP, ID-length, ESSID, Key"
 const _ClientHeader = "Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs"
 
-func Parse(dumpContent string) ([]models.NetworkClient, error) {
+func Parse(dumpContent string) (models.NetworkInfo, error) {
 
 	temp := strings.Split(dumpContent, "\n")
 	isAPSection := false
 	isClientSection := false
+	networkInfo := models.NetworkInfo{}
 	for _, element := range temp {
 		elementTrimmed := strings.TrimSpace(element)
 		if elementTrimmed == "" {
@@ -38,8 +39,9 @@ func Parse(dumpContent string) ([]models.NetworkClient, error) {
 			newAP.Mac = strings.TrimSpace(apColumns[0])
 			channel, _ := strconv.ParseInt(strings.TrimSpace(apColumns[3]), 0, 32)
 			newAP.Channel = int(channel)
-			log.Println(newAP)
-
+			newAP.Name = strings.TrimSpace(apColumns[13])
+			//log.Println(newAP)
+			networkInfo.AccessPoints = append(networkInfo.AccessPoints, newAP)
 		}
 		if isClientSection {
 			var newClient = models.NetworkClient{}
@@ -47,8 +49,11 @@ func Parse(dumpContent string) ([]models.NetworkClient, error) {
 			clientColumn := strings.Split(elementTrimmed, ",")
 			newClient.APMac = strings.TrimSpace(clientColumn[5])
 			newClient.Mac = strings.TrimSpace(clientColumn[0])
-			newClient.ProbedSSIDs = strings.Split(clientColumn[6], ",")
-			log.Println(newClient)
+			var probedSsidsCsv = strings.Join(clientColumn[6:], ",")
+			newClient.ProbedSSIDs = strings.Split(probedSsidsCsv, ",")
+
+			//log.Println(newClient)
+			networkInfo.Clients = append(networkInfo.Clients, newClient)
 		}
 
 		//log.Println("CLIENT: ", elementTrimmed)
@@ -57,6 +62,5 @@ func Parse(dumpContent string) ([]models.NetworkClient, error) {
 	// index is the index where we are
 	// element is the element from someSlice for where we are
 
-	var returnObject []models.NetworkClient
-	return returnObject, nil
+	return networkInfo, nil
 }

@@ -6,6 +6,11 @@ type ExecuteData struct {
 	Time      int64
 }
 
+type NetworkInfo struct {
+	Clients      []NetworkClient
+	AccessPoints []AccessPoint
+}
+
 type NetworkClient struct {
 	APMac       string
 	Mac         string
@@ -14,4 +19,5 @@ type NetworkClient struct {
 type AccessPoint struct {
 	Mac     string
 	Channel int
+	Name    string
 }
