@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-cmd/cmd"
 	"github.com/smiech/go-web/globals"
 
 	"github.com/gorilla/handlers"
@@ -35,7 +36,6 @@ func configureLogger() io.Writer {
 
 func main() {
 	output := make(chan string)
-	quit := make(chan bool)
 	quit2 := make(chan bool)
 	env := os.Args
 	var fileWriter io.Writer
@@ -45,21 +45,26 @@ func main() {
 	} else {
 		fileWriter = configureLogger()
 	}
-	executeHandlers.ExecuteCommand("./scripts/echo.sh", output, quit)
-	// Start a long-running process, capture stdout and stderr
-	//findCmd := cmd.NewCmd("./scripts/echo.sh")
-	///////findCmd.Start() // non-blocking
 
-	//ticker := time.NewTicker(2 * time.Second)
+	findCmd := cmd.NewCmdOptions(cmd.Options{Streaming: true}, "./scripts/echo.sh")
+	//findCmd.Stdout = nil
+
+	findCmd.Start() // non-blocking
+
+	ticker := time.NewTicker(2 * time.Second)
 
 	// Print last line of stdout every 2s
-	/* go func() {
+	go func() {
 		for range ticker.C {
 			status := findCmd.Status()
+			log.Println("Status length: ", len(status.Stdout))
 			n := len(status.Stdout)
-			fmt.Println(status.Stdout[n-1])
+			if n != 0 {
+				fmt.Println(status.Stdout[n-1])
+			}
+
 		}
-	}() */
+	}()
 
 	go executeHandlers.NewWatcher("./dumps", output, quit2)
 	// setup log file

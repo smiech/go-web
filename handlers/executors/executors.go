@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os/exec"
 
 	"github.com/smiech/go-web/globals"
 
@@ -53,25 +52,6 @@ func handleStart(data string, w http.ResponseWriter) {
 	log.Printf("return payload: %v", payload)
 	w.Header().Set("content-type", "application/json")
 	w.Write([]byte(payload))
-}
-
-func ExecuteCommand(path string, output chan<- string, quit <-chan bool) {
-	cmd := exec.Command("./scripts/echo.sh")
-
-	cmd.Stdout = nil
-
-	err := cmd.Start()
-	go func() {
-		select {
-		case <-quit:
-			log.Println("Killing process")
-			cmd.Process.Kill()
-		}
-	}()
-
-	if err != nil {
-		log.Printf("Error!! : %v", err)
-	}
 }
 
 func NewWatcher(path string, output chan<- string, quit <-chan bool) {
