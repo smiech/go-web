@@ -12,7 +12,7 @@ const _APHeader = "BSSID, First time seen, Last time seen, channel, Speed, Priva
 const _ClientHeader = "Station MAC, First time seen, Last time seen, Power, # packets, BSSID, Probed ESSIDs"
 
 func Parse(dumpContent string) (models.NetworkInfo, error) {
-
+	const clientInfoColumnCount = 6
 	temp := strings.Split(dumpContent, "\n")
 	isAPSection := false
 	isClientSection := false
@@ -36,6 +36,10 @@ func Parse(dumpContent string) (models.NetworkInfo, error) {
 		if isAPSection {
 			var newAP = models.AccessPoint{}
 			apColumns := strings.Split(elementTrimmed, ",")
+			if len(apColumns) < 14 {
+				log.Println("Couldn't parse the AP line: ", apColumns)
+				continue
+			}
 			newAP.Mac = strings.TrimSpace(apColumns[0])
 			channel, _ := strconv.ParseInt(strings.TrimSpace(apColumns[3]), 0, 32)
 			newAP.Channel = int(channel)
@@ -45,13 +49,20 @@ func Parse(dumpContent string) (models.NetworkInfo, error) {
 		}
 		if isClientSection {
 			var newClient = models.NetworkClient{}
-			log.Println(elementTrimmed)
 			clientColumn := strings.Split(elementTrimmed, ",")
+			if len(clientColumn) < clientInfoColumnCount {
+				log.Println("Couldn't parse the client line: ", clientColumn)
+				continue
+			}
 			newClient.APMac = strings.TrimSpace(clientColumn[5])
 			newClient.Mac = strings.TrimSpace(clientColumn[0])
-			var probedSsidsCsv = strings.Join(clientColumn[6:], ",")
-			newClient.ProbedSSIDs = strings.Split(probedSsidsCsv, ",")
-
+			if len(clientColumn) > clientInfoColumnCount {
+				var probedSsidsCsv = strings.Join(clientColumn[6:], ",")
+				var probedSsidsSplitted = strings.Split(probedSsidsCsv, ",")
+				if !(len(probedSsidsSplitted) == 1 && strings.TrimSpace(probedSsidsSplitted[0]) == "") {
+					newClient.ProbedSSIDs = strings.Split(probedSsidsCsv, ",")
+				}
+			}
 			//log.Println(newClient)
 			networkInfo.Clients = append(networkInfo.Clients, newClient)
 		}
