@@ -7,14 +7,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/smiech/go-web/globals"
+	"github.com/smiech/go-web/handlers/recon"
 
-	"github.com/fsnotify/fsnotify"
 	models "github.com/smiech/go-web/models"
 )
 
 var List = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	v := globals.NetworkInfo
+	v := recon.NetworkInfo
 	payload, _ := json.Marshal(v)
 	log.Printf("List command called")
 	w.Header().Set("Content-Type", "application/json")
@@ -54,54 +53,6 @@ func handleStart(data string, w http.ResponseWriter) {
 	w.Write([]byte(payload))
 }
 
-func NewWatcher(path string, output chan<- string, quit <-chan bool) {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer watcher.Close()
-
-	done := make(chan bool)
-	go func() {
-		for {
-			select {
-			case <-quit:
-				log.Println("Quiting filewatcher")
-				return
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-				log.Println("event:", event)
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Println("modified file:", event.Name)
-					b, err := ioutil.ReadFile(event.Name) // just pass the file name
-					if err != nil {
-						fmt.Print(err)
-					}
-
-					//fmt.Println(b) // print the content as 'bytes'
-
-					str := string(b) // convert content to a 'string'
-
-					output <- str // print the content as a 'string'
-
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-				log.Println("error:", err)
-			}
-		}
-	}()
-
-	err = watcher.Add(path)
-	if err != nil {
-		log.Fatal(err)
-	}
-	<-done
-}
 func handleStop(data string, w http.ResponseWriter) {
 	log.Printf("Handling stop command with data: %v", data)
 	payload := `{

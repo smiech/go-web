@@ -7,15 +7,11 @@ import (
 	"net/http"
 	"os"
 	"strings"
-	"time"
-
-	"github.com/go-cmd/cmd"
-	"github.com/smiech/go-web/globals"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	executeHandlers "github.com/smiech/go-web/handlers/executors"
-	fileParser "github.com/smiech/go-web/helpers"
+	recon "github.com/smiech/go-web/handlers/recon"
 )
 
 const username string = "adam"
@@ -35,8 +31,7 @@ func configureLogger() io.Writer {
 }
 
 func main() {
-	output := make(chan string)
-	quit2 := make(chan bool)
+
 	env := os.Args
 	var fileWriter io.Writer
 	envLength := len(env)
@@ -46,57 +41,8 @@ func main() {
 		fileWriter = configureLogger()
 	}
 
-	findCmd := cmd.NewCmdOptions(cmd.Options{Streaming: true}, "./scripts/echo.sh")
-	//findCmd.Stdout = nil
+	recon.Start()
 
-	findCmd.Start() // non-blocking
-
-	ticker := time.NewTicker(2 * time.Second)
-
-	// Print last line of stdout every 2s
-	go func() {
-		for range ticker.C {
-			status := findCmd.Status()
-			log.Println("Status length: ", len(status.Stdout))
-			n := len(status.Stdout)
-			if n != 0 {
-				fmt.Println(status.Stdout[n-1])
-			}
-
-		}
-	}()
-
-	go executeHandlers.NewWatcher("./dumps", output, quit2)
-	// setup log file
-	/* fileReader, _ := os.Open("dumps/dump-01.csv")
-	file, _ := ioutil.ReadAll(fileReader)
-	records, err := fileParser.Parse(string(file))
-	if err != nil {
-		fmt.Printf("error opening file: %v", err)
-	}
-	log.Println(records)
-	globals.NetworkInfo = records */
-
-	go func() {
-		for {
-			select {
-			case file := <-output:
-				log.Println("File contents:")
-				log.Println("modified file:", file)
-				records, err := fileParser.Parse(file)
-				if err != nil {
-					fmt.Printf("error opening file: %v", err)
-				}
-				log.Println(records)
-				globals.NetworkInfo = records
-			case <-time.After(50 * time.Second):
-				log.Println("Sending quit signal")
-				//findCmd.Stop()
-				//quit <- true
-				//quit2 <- true
-			}
-		}
-	}()
 	port = os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {
 		port = os.Getenv("port")
