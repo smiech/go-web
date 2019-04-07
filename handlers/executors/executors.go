@@ -34,8 +34,16 @@ var ExecuteHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Reques
 
 	switch jsonMap.CommandId {
 	case "start":
+		recon.Start()
+		handleStart(jsonMap.Data, w)
+	case "startSpecific":
+		recon.StartSpecific(jsonMap.Data)
 		handleStart(jsonMap.Data, w)
 	case "stop":
+		recon.Stop()
+		handleStop(jsonMap.Data, w)
+	case "stopSpecific":
+		recon.StopSpecific()
 		handleStop(jsonMap.Data, w)
 	default:
 		log.Printf("Not supported command: %v", jsonMap.CommandId)
@@ -48,6 +56,7 @@ func handleStart(data string, w http.ResponseWriter) {
 	payload := `{
 		"` + fmt.Sprintf("%v", data) + `"
 	}`
+
 	log.Printf("return payload: %v", payload)
 	w.Header().Set("content-type", "application/json")
 	w.Write([]byte(payload))

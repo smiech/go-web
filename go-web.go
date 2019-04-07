@@ -41,7 +41,8 @@ func main() {
 		fileWriter = configureLogger()
 	}
 
-	recon.Start()
+	//recon.Start()
+	recon.StartSpecific("VFNL-F39F815G")
 
 	port = os.Getenv("HTTP_PLATFORM_PORT")
 	if port == "" {
